@@ -1,6 +1,6 @@
 package com.zzzmode.appopsx.common;
 
-import android.arch.lifecycle.BuildConfig;
+import com.zzzmode.appopsx.BuildConfig;
 import android.util.Log;
 
 import java.io.FileOutputStream;
