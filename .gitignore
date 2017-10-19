@@ -7,6 +7,8 @@
 /build
 /captures
 .externalNativeBuild
+/package/system
+/appopsx.zip
 
 ### OSX template
 *.DS_Store
@@ -110,6 +112,7 @@ hs_err_pid*
 
 # IntelliJ
 /out/
+/app/*.apk
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

@@ -57,7 +57,7 @@ public final class OtherOp {
             ClassLoader.getSystemClassLoader());
         sSupportCount = ReflectUtils.hasField(aClass,"mAllowedCount");
       } catch (ClassNotFoundException e) {
-        e.printStackTrace();
+        FLog.log("No mAllowedCount");
       }
     }
     return sSupportCount;

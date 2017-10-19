@@ -78,7 +78,6 @@ public class SettingsActivity extends BaseActivity {
       Preference.OnPreferenceClickListener {
 
     private Preference mPrefAppSort;
-    private Preference mUseAdb;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -87,17 +86,11 @@ public class SettingsActivity extends BaseActivity {
       findPreference("ignore_premission").setOnPreferenceClickListener(this);
       findPreference("show_sysapp").setOnPreferenceClickListener(this);
 
-      mUseAdb = findPreference("use_adb");
-      mUseAdb.setOnPreferenceClickListener(this);
-
-      findPreference("allow_bg_remote").setOnPreferenceClickListener(this);
       findPreference("project").setOnPreferenceClickListener(this);
 
       findPreference("opensource_licenses").setOnPreferenceClickListener(this);
       findPreference("help").setOnPreferenceClickListener(this);
       findPreference("translate").setOnPreferenceClickListener(this);
-
-      findPreference("shell_start").setOnPreferenceClickListener(this);
 
       Preference version = findPreference("version");
       version.setSummary(BuildConfig.VERSION_NAME);
@@ -147,26 +140,6 @@ public class SettingsActivity extends BaseActivity {
         }
       });
 
-      findPreference("show_log")
-          .setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-              ATracker.send(AEvent.C_SETTING_SHOW_LOG);
-              showLog();
-              return true;
-            }
-          });
-
-      findPreference("close_server")
-          .setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-              ATracker.send(AEvent.C_SETTING_CLOSE_SERVER);
-              closeServer();
-              return true;
-            }
-          });
-
       findPreference("pref_app_daynight_mode")
           .setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
@@ -176,33 +149,6 @@ public class SettingsActivity extends BaseActivity {
               return true;
             }
           });
-
-      final NumberPickerPreference adbPortPreference = (NumberPickerPreference) findPreference(
-          "use_adb_port");
-      adbPortPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
-          if (newValue instanceof Integer) {
-            mUseAdb.setSummary(getString(R.string.use_adb_mode_summary, (int) newValue));
-          }
-          return true;
-        }
-      });
-
-      mUseAdb.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
-          if (newValue instanceof Boolean) {
-            adbPortPreference.setVisible(((Boolean) newValue));
-          }
-          return true;
-        }
-      });
-
-      mUseAdb.setSummary(getString(R.string.use_adb_mode_summary, adbPortPreference.getValue()));
-
-      adbPortPreference.setVisible(
-          PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("use_adb", false));
     }
 
     @Override
@@ -394,33 +340,6 @@ public class SettingsActivity extends BaseActivity {
       it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       getActivity().startActivity(it);
       getActivity().finish();
-    }
-
-    private void showLog() {
-      SingleJust.create(new SingleOnSubscribe<String>() {
-        @Override
-        public void subscribe(SingleEmitter<String> e) throws Exception {
-          e.onSuccess(AppOpsx.readLogs(getActivity()));
-        }
-      }).subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(new SingleObserver<String>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
-
-            @Override
-            public void onSuccess(String value) {
-              showTextDialog(R.string.show_log, value);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-          });
-
     }
 
     private void showVersion() {
