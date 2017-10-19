@@ -16,6 +16,7 @@ import com.zzzmode.appopsx.ui.analytics.AEvent;
 import com.zzzmode.appopsx.ui.analytics.ATracker;
 import com.zzzmode.appopsx.ui.model.AppInfo;
 import com.zzzmode.appopsx.ui.permission.AlertInstalledPremActivity;
+import com.zzzmode.appopsx.common.FLog;
 
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -33,7 +34,7 @@ public class AppInstalledRevicer extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {
     String action = intent.getAction();
-    Log.e(TAG, "onReceive --> " + action);
+    FLog.log(TAG + " onReceive --> " + action);
     //忽略更新
     if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
       return;

@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FLog {
   public static void log(String log) {
     if (BuildConfig.DEBUG)
-      Log.d("appopsx", "Flog --> " + log);
+      Log.d("appopsx", log);
   }
 
   public static void log(Throwable e) {

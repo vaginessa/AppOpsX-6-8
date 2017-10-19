@@ -12,7 +12,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +23,7 @@ import com.zzzmode.appopsx.R;
 import com.zzzmode.appopsx.common.OpEntry;
 import com.zzzmode.appopsx.common.OpsResult;
 import com.zzzmode.appopsx.common.PackageOps;
+import com.zzzmode.appopsx.common.FLog;
 import com.zzzmode.appopsx.ui.BaseActivity;
 import com.zzzmode.appopsx.ui.analytics.AEvent;
 import com.zzzmode.appopsx.ui.analytics.ATracker;
@@ -305,7 +305,7 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
           .subscribe(new ResourceObserver<AppOpEntry>() {
             @Override
             public void onNext(AppOpEntry value) {
-              Log.e(TAG, "onNext --> " + value);
+              FLog.log(TAG + " onNext --> " + value);
 
             }
 

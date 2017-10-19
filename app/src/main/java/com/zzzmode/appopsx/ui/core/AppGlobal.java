@@ -5,8 +5,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 
+import com.zzzmode.appopsx.common.FLog;
 import com.zzzmode.appopsx.ui.analytics.ATracker;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,7 +74,7 @@ public class AppGlobal extends Application implements Application.ActivityLifecy
   public void onActivityDestroyed(Activity activity) {
     int i = mAliveActivity.decrementAndGet();
     if (i <= 0) {
-      Log.e("test", "onActivityDestroyed --> ");
+      FLog.log("onActivityDestroyed --> ");
       Helper.closeBgServer(getApplicationContext());
     }
   }
