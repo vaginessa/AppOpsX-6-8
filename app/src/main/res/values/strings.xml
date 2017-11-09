@@ -23,6 +23,8 @@
   <string name="others">Other</string>
   <string name="auto_ignore_premission">Automatically turn off permissions</string>
   <string name="auto_ignore_summary">All permissions auto turn off after application installed</string>
+  <string name="show_ignore_dialog">Show permission dialog</string>
+  <string name="show_ignore_dialog_summary">Show dialog to set permissions after application installed</string>
   <string name="auto_ignore_permission_title">Close permission template automatically</string>
   <string name="auto_ignore_permission_temp_summary">Only selected permissions will be turned off once auto turn off permission function is on</string>
   <string name="allow_bg_remote">Allow running in the background</string>

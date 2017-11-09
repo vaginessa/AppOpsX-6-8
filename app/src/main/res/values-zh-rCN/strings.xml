@@ -24,6 +24,8 @@
   <string name="others">其他</string>
   <string name="auto_ignore_premission">自动关闭权限</string>
   <string name="auto_ignore_summary">应用安装后自动关闭(忽略)所有权限。\r\n部分机型上AppOpsX被关闭后可能收不到应用安装广播，请酌情添加白名单。</string>
+  <string name="show_ignore_dialog">自动显示权限窗口</string>
+  <string name="show_ignore_dialog_summary">应用安装后自动显示权限设置窗口。</string>
 
 
   <string name="auto_ignore_permission_title">自动关闭权限模板</string>

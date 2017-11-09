@@ -12,6 +12,12 @@
       android:title="@string/auto_ignore_premission"
       android:summary="@string/auto_ignore_summary"/>
 
+    <android.support.v7.preference.CheckBoxPreference
+        android:defaultValue="false"
+        android:key="show_ignore_dialog"
+        android:title="@string/show_ignore_dialog"
+        android:summary="@string/show_ignore_dialog_summary"/>
+
     <android.support.v7.preference.Preference
       android:key="ignore_premission_templete"
       android:title="@string/auto_ignore_permission_title"

@@ -44,8 +44,11 @@ public class AppInstalledRevicer extends BroadcastReceiver {
     if (sp.getBoolean("ignore_premission", true)) {
       try {
         String pkgName = intent.getData().getEncodedSchemeSpecificPart();
-        //disable(context.getApplicationContext(),pkgName);
-        showDlg(context.getApplicationContext(), pkgName);
+        if (sp.getBoolean("show_ignore_dialog", false)) {
+            showDlg(context.getApplicationContext(), pkgName);
+        } else {
+            disable(context.getApplicationContext(), pkgName);
+        }
       } catch (Exception e) {
         e.printStackTrace();
       }
