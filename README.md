@@ -1,5 +1,5 @@
 ## AppOpsX
-[![Build Status](https://img.shields.io/travis/8enet/AppOpsX.svg)][ci]
+[![Build Status](https://travis-ci.org/linusyang92/AppOpsX.svg)][ci]
 [![Release Version](https://img.shields.io/github/release/8enet/AppOpsX.svg)][releases]
 [![Issues](https://img.shields.io/github/issues/8enet/AppOpsX.svg)][issues]
 [![Software License](https://img.shields.io/github/license/8enet/AppOpsX.svg)][license]
@@ -7,8 +7,6 @@
 [![coolapk](https://img.shields.io/badge/coolapk-download-blue.svg)][coolapk]
 
 AppOpsX is a front-end application for the Android AppOpsService. It allows you to restrict app permissions.
-
-> ROOT or ADB shell is required.
 
 [简体中文](README.zh.md)
 

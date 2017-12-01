@@ -1,5 +1,5 @@
 ## AppOpsX
-[![Build Status](https://img.shields.io/travis/8enet/AppOpsX.svg)][1]
+[![Build Status](https://travis-ci.org/linusyang92/AppOpsX.svg)][1]
 [![Release Version](https://img.shields.io/github/release/8enet/AppOpsX.svg)][2]
 [![Issues](https://img.shields.io/github/issues/8enet/AppOpsX.svg)][3]
 [![Software License](https://img.shields.io/github/license/8enet/AppOpsX.svg)][4]
@@ -19,7 +19,6 @@
 * 自动忽略权限模板设置
 * 多用户支持
 * WiFi/移动数据联网控制
-* 支持ROOT/ADB两种使用模式
 * Android 4.4+
 * ...
 
