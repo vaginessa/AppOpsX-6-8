@@ -1372,27 +1372,29 @@ public class Helper {
   }
 
   private static void updateService(final Context context, final String packageName,
-                                    ServiceEntryInfo info) throws IOException {
+                                    List<ServiceEntryInfo> infos) throws IOException {
     File xmlFile = new File(BFileUtils.getBackupDir(context), xmlBackupName);
     xmlDictInit(xmlFile);
-    if (info != null) {
-      Map<String, Set<String>> disabledServices = new LinkedHashMap<>();
-      String key = info.isBroadcast ? "broadcast" : "service";
-      if (xmlDict.containsKey(key)) {
-        disabledServices = xmlDict.get(key);
-      } else {
-        xmlDict.put(key, disabledServices);
-      }
-      Set<String> serviceSet = new LinkedHashSet<>();
-      if (disabledServices.containsKey(packageName)) {
-        serviceSet = disabledServices.get(packageName);
-      } else {
-        disabledServices.put(packageName, serviceSet);
-      }
-      if (!info.serviceEnabled) {
-        serviceSet.add(info.serviceName);
-      } else {
-        serviceSet.remove(info.serviceName);
+    if (infos != null && !infos.isEmpty()) {
+      for (ServiceEntryInfo info: infos) {
+        Map<String, Set<String>> disabledServices = new LinkedHashMap<>();
+        String key = info.isBroadcast ? "broadcast" : "service";
+        if (xmlDict.containsKey(key)) {
+          disabledServices = xmlDict.get(key);
+        } else {
+          xmlDict.put(key, disabledServices);
+        }
+        Set<String> serviceSet = new LinkedHashSet<>();
+        if (disabledServices.containsKey(packageName)) {
+          serviceSet = disabledServices.get(packageName);
+        } else {
+          disabledServices.put(packageName, serviceSet);
+        }
+        if (!info.serviceEnabled) {
+          serviceSet.add(info.serviceName);
+        } else {
+          serviceSet.remove(info.serviceName);
+        }
       }
     }
     StringBuilder result = new StringBuilder();
@@ -1412,7 +1414,7 @@ public class Helper {
       result.append("</" + label + ">\n");
     }
     result.append("</rules>\n");
-    if (info != null) {
+    if (infos != null && !infos.isEmpty()) {
       try (BufferedWriter writer = new BufferedWriter(new FileWriter(xmlFile))) {
         writer.write(result.toString());
       }
@@ -1441,7 +1443,24 @@ public class Helper {
     return Observable.create(new ObservableOnSubscribe<Boolean>() {
       @Override
       public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
-        updateService(context, pkgName, opEntryInfo);
+        List<ServiceEntryInfo> infos = new ArrayList<>();
+        if (opEntryInfo != null) {
+          infos.add(opEntryInfo);
+        }
+        updateService(context, pkgName, infos);
+        e.onNext(true);
+        e.onComplete();
+      }
+    });
+  }
+
+  public static Observable<Boolean> setBatchService(final Context context, final String pkgName,
+                                                    final List<ServiceEntryInfo> opEntryInfos) {
+
+    return Observable.create(new ObservableOnSubscribe<Boolean>() {
+      @Override
+      public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+        updateService(context, pkgName, opEntryInfos);
         e.onNext(true);
         e.onComplete();
       }

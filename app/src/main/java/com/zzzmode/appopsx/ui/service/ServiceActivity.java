@@ -232,9 +232,9 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
         if (datas != null) {
             for (ServiceEntryInfo data : datas) {
                 data.serviceEnabled = enabled;
-                mPresenter.setMode(data);
                 adapter.updateItem(data);
             }
+            mPresenter.setModes(datas);
         }
     }
 
