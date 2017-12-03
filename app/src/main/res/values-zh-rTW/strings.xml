@@ -114,6 +114,6 @@
   <string name="no_services">此應用沒有使用任何服務</string>
   <string name="toast_error">錯誤</string>
   <string name="ifw_disable_title">禁用服務</string>
-  <string name="ifw_disable_summary">使用 ifw.xml (Intent 防火牆) 禁用服務和廣播</string>
+  <string name="ifw_disable_summary">使用 ifw.xml (Intent 防火牆) 禁用服務和廣播，長按程式項以顯示服務列表。</string>
   <string name="ifw_disabled_hint">禁用服務功能已關閉，請在設置中開啓。</string>
 </resources>

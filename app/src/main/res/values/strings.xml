@@ -114,6 +114,6 @@
   <string name="perms_count">%1$s (used %2$d times)</string>
   <string name="toast_error">Error</string>
   <string name="ifw_disable_title">Disable services</string>
-  <string name="ifw_disable_summary">Use ifw.xml (Intent Firewall) to disable services and broadcasts</string>
+  <string name="ifw_disable_summary">Use ifw.xml (Intent Firewall) to disable services and broadcasts. Long press app to show the service list.</string>
   <string name="ifw_disabled_hint">\"Disable services\" feature is disabled. Please enable it in settings.</string>
 </resources>
