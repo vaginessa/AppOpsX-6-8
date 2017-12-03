@@ -10,6 +10,8 @@ import com.zzzmode.appopsx.ui.analytics.AEvent;
 import com.zzzmode.appopsx.ui.analytics.ATracker;
 import com.zzzmode.appopsx.ui.model.AppInfo;
 import com.zzzmode.appopsx.ui.permission.AppPermissionActivity;
+import com.zzzmode.appopsx.ui.service.ServiceActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +20,7 @@ import java.util.List;
  */
 
 class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
-    View.OnClickListener {
+    View.OnClickListener, View.OnLongClickListener {
 
   protected List<AppInfo> appInfos = new ArrayList<>();
 
@@ -53,7 +55,7 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
     holder.tvName.setText(processText(appInfo.appName));
     holder.itemView.setTag(appInfo);
     holder.itemView.setOnClickListener(this);
-
+    holder.itemView.setOnLongClickListener(this);
   }
 
   protected CharSequence processText(String name) {
@@ -81,4 +83,13 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
     return AEvent.C_APP;
   }
 
+  @Override
+  public boolean onLongClick(View v) {
+    if (v.getTag() instanceof AppInfo) {
+      Intent intent = new Intent(v.getContext(), ServiceActivity.class);
+      intent.putExtra(ServiceActivity.EXTRA_APP, ((AppInfo) v.getTag()));
+      v.getContext().startActivity(intent);
+    }
+    return true;
+  }
 }

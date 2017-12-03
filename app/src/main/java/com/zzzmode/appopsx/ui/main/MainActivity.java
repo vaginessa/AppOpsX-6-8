@@ -135,6 +135,21 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
         ActivityCompat.invalidateOptionsMenu(MainActivity.this);
       }
     });
+    Helper.setService(getApplicationContext(), "", null)
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new ResourceObserver<Boolean>() {
+              @Override
+              public void onNext(Boolean value) {
+              }
+
+              @Override
+              public void onError(Throwable e) {
+              }
+
+              @Override
+              public void onComplete() {
+              }
+            });
   }
 
   @Override

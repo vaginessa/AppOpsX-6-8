@@ -141,4 +141,13 @@
 
   <string name="menu_stats">权限使用情况</string>
   <string name="perms_count">%1$s (已使用 %2$d 次)</string>
+  <string name="menu_service_disable_all">全部禁用</string>
+  <string name="menu_service_enable_all">全部启用</string>
+  <string name="menu_show_broadcast">显示广播</string>
+  <string name="menu_show_full_name">显示全名</string>
+  <string name="no_services">此应用没有使用任何服务</string>
+  <string name="toast_error">错误</string>
+  <string name="ifw_disable_title">禁用服务</string>
+  <string name="ifw_disable_summary">使用 ifw.xml (Intent 防火墙) 禁用服务和广播</string>
+  <string name="ifw_disabled_hint">禁用服务功能已关闭，请在设置中开启。</string>
 </resources>

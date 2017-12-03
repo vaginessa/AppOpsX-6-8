@@ -36,6 +36,7 @@ import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.operators.single.SingleJust;
+import io.reactivex.observers.ResourceObserver;
 import io.reactivex.schedulers.Schedulers;
 import java.util.Collections;
 import java.util.List;
@@ -85,6 +86,29 @@ public class SettingsActivity extends BaseActivity {
 
       findPreference("ignore_premission").setOnPreferenceClickListener(this);
       findPreference("show_sysapp").setOnPreferenceClickListener(this);
+      findPreference("ifw_enabled")
+              .setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                  Context context = getActivity().getApplicationContext();
+                  Helper.setService(context, "", null)
+                          .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                          .subscribe(new ResourceObserver<Boolean>() {
+                            @Override
+                            public void onNext(Boolean value) {
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                            }
+
+                            @Override
+                            public void onComplete() {
+                            }
+                          });
+                  return true;
+                }
+              });
 
       findPreference("project").setOnPreferenceClickListener(this);
 

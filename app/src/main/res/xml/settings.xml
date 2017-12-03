@@ -22,6 +22,12 @@
       android:key="ignore_premission_templete"
       android:title="@string/auto_ignore_permission_title"
       android:summary="@string/auto_ignore_permission_temp_summary"/>
+
+    <android.support.v7.preference.CheckBoxPreference
+        android:defaultValue="true"
+        android:key="ifw_enabled"
+        android:title="@string/ifw_disable_title"
+        android:summary="@string/ifw_disable_summary"/>
   </android.support.v7.preference.PreferenceCategory>
 
   <android.support.v7.preference.PreferenceCategory

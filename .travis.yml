@@ -38,6 +38,7 @@ deploy:
   file_glob: true
   file:
   - appopsx.zip
+  - package/system/priv-app/AppOpsX/AppOpsX.apk
   overwrite: true
   skip_cleanup: true
   on:

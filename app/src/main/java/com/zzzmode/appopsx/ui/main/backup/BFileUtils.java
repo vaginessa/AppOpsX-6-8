@@ -17,7 +17,7 @@ import java.util.Random;
  * Created by zl on 2017/5/7.
  */
 
-class BFileUtils {
+public class BFileUtils {
 
   private static final String DIR_NAME = "backup";
   private static final String SUFFIX = ".bak";

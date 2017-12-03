@@ -12,9 +12,14 @@
   <string name="menu_show_perm_time">Display last use time of permissions</string>
   <string name="menu_open_all">Allow all permissions</string>
   <string name="menu_close_all">Ignore all permissions</string>
+  <string name="menu_show_full_name">Display full name</string>
+  <string name="menu_show_broadcast">Display broadcasts</string>
+  <string name="menu_service_enable_all">Enable all</string>
+  <string name="menu_service_disable_all">Disable all</string>
   <string name="open_all_perms">Allow all</string>
   <string name="close_all_perms">Ignore all</string>
   <string name="no_perms">The app doesn\'t ask for any permissions</string>
+  <string name="no_services">The app doesn\'t have any services</string>
   <string name="about">About</string>
   <string name="version">Version</string>
   <string name="normal">General</string>
@@ -107,4 +112,8 @@
   <string name="with_root_network">Display network connections permissions</string>
   <string name="menu_stats">Usage stats</string>
   <string name="perms_count">%1$s (used %2$d times)</string>
+  <string name="toast_error">Error</string>
+  <string name="ifw_disable_title">Disable services</string>
+  <string name="ifw_disable_summary">Use ifw.xml (Intent Firewall) to disable services and broadcasts</string>
+  <string name="ifw_disabled_hint">\"Disable services\" feature is disabled. Please enable it in settings.</string>
 </resources>

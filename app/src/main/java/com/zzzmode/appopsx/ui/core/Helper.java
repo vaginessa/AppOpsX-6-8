@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
@@ -16,14 +17,17 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
+import android.support.v4.content.FileProvider;
 import android.support.v4.text.BidiFormatter;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+
 import com.zzzmode.appopsx.BuildConfig;
 import com.zzzmode.appopsx.R;
 import com.zzzmode.appopsx.common.OpEntry;
@@ -33,39 +37,53 @@ import com.zzzmode.appopsx.common.PackageOps;
 import com.zzzmode.appopsx.common.ReflectUtils;
 import com.zzzmode.appopsx.ui.analytics.AEvent;
 import com.zzzmode.appopsx.ui.analytics.ATracker;
+import com.zzzmode.appopsx.ui.main.backup.BFileUtils;
 import com.zzzmode.appopsx.ui.model.AppInfo;
 import com.zzzmode.appopsx.ui.model.AppPermissions;
 import com.zzzmode.appopsx.ui.model.OpEntryInfo;
 import com.zzzmode.appopsx.ui.model.PermissionChildItem;
 import com.zzzmode.appopsx.ui.model.PermissionGroup;
 import com.zzzmode.appopsx.ui.model.PreAppInfo;
+import com.zzzmode.appopsx.ui.model.ServiceEntryInfo;
 import com.zzzmode.appopsx.ui.permission.AppPermissionActivity;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.ObservableSource;
-import io.reactivex.Single;
-import io.reactivex.SingleSource;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.BiConsumer;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
-import io.reactivex.internal.operators.single.SingleJust;
-import io.reactivex.observers.ResourceSingleObserver;
-import io.reactivex.schedulers.Schedulers;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.ObservableSource;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.BiConsumer;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
+import io.reactivex.internal.operators.single.SingleJust;
+import io.reactivex.observers.ResourceSingleObserver;
+import io.reactivex.schedulers.Schedulers;
+
+import static android.content.pm.PackageManager.GET_RECEIVERS;
+import static android.content.pm.PackageManager.GET_SERVICES;
 
 /**
  * Created by zl on 2017/1/17.
@@ -1284,6 +1302,184 @@ public class Helper {
           }
         }
         return ret;
+      }
+    });
+  }
+
+  // IFW xml support
+
+  private static Map<String, Map<String, Set<String>>> xmlDict = null;
+  public static final String xmlBackupName = "ifw_backup.xml";
+
+  private static <K, V> V getOrDefault(Map<K,V> map, K key, V defaultValue) {
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+
+  private static void xmlDictInit(final File file) throws IOException {
+    if (xmlDict != null) {
+      return;
+    }
+    xmlDict = new LinkedHashMap<>();
+    if (file.exists()) {
+      try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        String line;
+        String name = "";
+        Map<String, Set<String>> outList = new LinkedHashMap<>();
+        while ((line = reader.readLine()) != null) {
+          final Pattern startLine = Pattern.compile("<([\\w]+)\\s+block=\"true\"\\s+log=\"false\">");
+          Matcher m = startLine.matcher(line);
+          if (m.matches()) {
+            name = m.group(1);
+            outList = new LinkedHashMap<>();
+          }
+          if (line.contains("</" + name + ">")) {
+            xmlDict.put(name.toLowerCase(), outList);
+            continue;
+          }
+          final Pattern filterLine = Pattern.compile("<component-filter\\s+name=\"([^\"]+)\"\\s/>");
+          m = filterLine.matcher(line);
+          if (m.matches()) {
+            String[] ident = m.group(1).split("/");
+            if (ident.length > 1) {
+              Set<String> services = getOrDefault(outList, ident[0], new LinkedHashSet<String>());
+              services.add(ident[1]);
+              outList.put(ident[0], services);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private static Map<String, Boolean> getServiceDisabledMap(final Context context,
+                                                            final String packageName,
+                                                            final boolean isBroadcast) throws IOException {
+    File xmlFile = new File(BFileUtils.getBackupDir(context), xmlBackupName);
+    xmlDictInit(xmlFile);
+    Map<String, Boolean> result = new HashMap<>();
+    String key = isBroadcast ? "broadcast" : "service";
+    if (xmlDict != null && xmlDict.containsKey(key)) {
+      Map<String, Set<String>> allServices = xmlDict.get(key);
+      if (allServices.containsKey(packageName)) {
+        Set<String> serviceSet = allServices.get(packageName);
+        String[] disabledServices = serviceSet.toArray(new String[serviceSet.size()]);
+        for (String service: disabledServices) {
+          result.put(service, false);
+        }
+      }
+    }
+    return result;
+  }
+
+  private static void updateService(final Context context, final String packageName,
+                                    ServiceEntryInfo info) throws IOException {
+    File xmlFile = new File(BFileUtils.getBackupDir(context), xmlBackupName);
+    xmlDictInit(xmlFile);
+    if (info != null) {
+      Map<String, Set<String>> disabledServices = new LinkedHashMap<>();
+      String key = info.isBroadcast ? "broadcast" : "service";
+      if (xmlDict.containsKey(key)) {
+        disabledServices = xmlDict.get(key);
+      } else {
+        xmlDict.put(key, disabledServices);
+      }
+      Set<String> serviceSet = new LinkedHashSet<>();
+      if (disabledServices.containsKey(packageName)) {
+        serviceSet = disabledServices.get(packageName);
+      } else {
+        disabledServices.put(packageName, serviceSet);
+      }
+      if (!info.serviceEnabled) {
+        serviceSet.add(info.serviceName);
+      } else {
+        serviceSet.remove(info.serviceName);
+      }
+    }
+    StringBuilder result = new StringBuilder();
+    result.append("<rules>\n");
+    for (Map.Entry<String, Map<String, Set<String>>> entry: xmlDict.entrySet()) {
+      String label = entry.getKey();
+      result.append("<" + label + " block=\"true\" log=\"false\">\n");
+      Map<String, Set<String>> allServices = entry.getValue();
+      for (Map.Entry<String, Set<String>> sEntry: allServices.entrySet()) {
+        String pack = sEntry.getKey();
+        Set<String> set = sEntry.getValue();
+        String[] services = set.toArray(new String[set.size()]);
+        for (String service: services) {
+          result.append("<component-filter name=\"" + pack + "/" + service + "\" />\n");
+        }
+      }
+      result.append("</" + label + ">\n");
+    }
+    result.append("</rules>\n");
+    if (info != null) {
+      try (BufferedWriter writer = new BufferedWriter(new FileWriter(xmlFile))) {
+        writer.write(result.toString());
+      }
+    }
+    File transferPath = new File(context.getFilesDir(), "ifw");
+    if (!transferPath.exists()) {
+      transferPath.mkdir();
+    }
+    File transfer = new File(transferPath, "ifw.xml");
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(transfer))) {
+      boolean ifwEnabled = PreferenceManager.getDefaultSharedPreferences(context)
+              .getBoolean("ifw_enabled", true);
+      writer.write(ifwEnabled ? result.toString() : "<rules>\n</rules>\n");
+    }
+    Intent i = new Intent("android.intent.action.UPDATE_INTENT_FIREWALL");
+    i.putExtra("REQUIRED_HASH", "NONE");
+    i.putExtra("VERSION", "1");
+    Uri contentUri = FileProvider.getUriForFile(context, "com.zzzmode.appopsx.fileprovider", transfer);
+    i.setData(contentUri);
+    context.sendBroadcast(i);
+  }
+
+  public static Observable<Boolean> setService(final Context context, final String pkgName,
+                                               final ServiceEntryInfo opEntryInfo) {
+
+    return Observable.create(new ObservableOnSubscribe<Boolean>() {
+      @Override
+      public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+        updateService(context, pkgName, opEntryInfo);
+        e.onNext(true);
+        e.onComplete();
+      }
+    });
+  }
+
+  public static Observable<List<ServiceEntryInfo>> getAppServices(final Context context,
+                                                                  final String packageName,
+                                                                  final boolean isBroadcast) {
+    return Observable.create(new ObservableOnSubscribe<List<ServiceEntryInfo>>() {
+      @Override
+      public void subscribe(ObservableEmitter<List<ServiceEntryInfo>> e) throws Exception {
+        PackageManager packageManager = context.getPackageManager();
+        PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_RECEIVERS | GET_SERVICES);
+        ComponentInfo[] services = isBroadcast ? packageInfo.receivers : packageInfo.services;
+        List<ServiceEntryInfo> list = new ArrayList<>();
+        if (services != null) {
+          Map<String, Boolean> disabledMap = getServiceDisabledMap(context, packageName, isBroadcast);
+          for (ComponentInfo s: services) {
+            list.add(new ServiceEntryInfo(packageName, s.name,
+                    getOrDefault(disabledMap, s.name, true), isBroadcast));
+          }
+          Collections.sort(list, new Comparator<ServiceEntryInfo>() {
+            private String getShort(String s) {
+              String[] shortNames = s.split("\\.");
+              return shortNames[shortNames.length - 1];
+            }
+
+            @Override
+            public int compare(ServiceEntryInfo o1, ServiceEntryInfo o2) {
+              String s1 = getShort(o1.serviceName);
+              String s2 = getShort(o2.serviceName);
+              return s1.compareTo(s2);
+            }
+          });
+        }
+        e.onNext(list);
+        e.onComplete();
       }
     });
   }

@@ -1,6 +1,8 @@
 #!/sbin/sh
 
 tmp=/tmp/appopsx
+ifw_base=/data/system/ifw
+ifw_meta="$ifw_base/metadata"
 
 if [ "$3" ]; then
     zip=$3
@@ -57,6 +59,19 @@ if mount | grep ro | grep -q /system; then
     mount -o remount,rw /system || print "Failed to mount read-write!"
     print 'Remount as read-write...'
 fi
+
+print "Setting up ifw directory..."
+if ! [ -d $ifw_base ]; then
+    mkdir -p $ifw_base
+    chown system:system $ifw_base
+    chmod 700 $ifw_base
+    print "Created ifw folder"
+fi
+rm -rf "$ifw_meta"
+touch "$ifw_meta"
+chown 0:0 "$ifw_meta"
+chmod 600 "$ifw_meta"
+[ -f "$ifw_meta" ] && print "Created fake ifw metadata" || abort "Failed to setup ifw"
 
 [ "$zip" ] && {
     extract "$zip" "$tmp"
