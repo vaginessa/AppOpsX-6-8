@@ -9,6 +9,7 @@
 .externalNativeBuild
 /package/system
 /appopsx.zip
+/uninstaller.zip
 
 ### OSX template
 *.DS_Store

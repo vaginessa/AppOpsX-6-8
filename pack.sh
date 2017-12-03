@@ -1,4 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -e
 
 cd "$(dirname "$0")"
 ./gradlew clean build
@@ -20,4 +22,9 @@ mkdir -p "$(dirname $DEST)"
 
 rm -f $TARGET
 zip -9 -r $TARGET . -X -x \*.DS_Store
+
+cd ../uninstaller
+rm -f ../uninstaller.zip
+zip -9 -r ../uninstaller.zip . -X -x \*.DS_Store
+
 echo 'Done!'

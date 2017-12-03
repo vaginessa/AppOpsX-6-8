@@ -49,9 +49,13 @@ setperm() {
     find "$3" -type f -exec chmod "$2" {} \;
 }
 
-print "*********************"
-print "* AppOpsX Installer *"
-print "*********************"
+print "***********************"
+print "* AppOpsX Uninstaller *"
+print "***********************"
+
+print "Clean up ifw directory..."
+rm -rf "$ifw_meta"
+rm -f "$ifw_base/ifw.xml"
 
 print "Mounting filesystems..."
 mount /system
@@ -60,40 +64,10 @@ if mount | grep ro | grep -q /system; then
     print 'Remount as read-write...'
 fi
 
-print "Setting up ifw directory..."
-if ! [ -d $ifw_base ]; then
-    mkdir -p $ifw_base
-    chown system:system $ifw_base
-    chmod 700 $ifw_base
-    print "Created ifw folder"
-fi
-rm -rf "$ifw_meta"
-touch "$ifw_meta"
-chown 0:0 "$ifw_meta"
-chmod 600 "$ifw_meta"
-[ -f "$ifw_meta" ] && print "Created fake ifw metadata" || abort "Failed to setup ifw"
-
-[ "$zip" ] && {
-    extract "$zip" "$tmp"
-}
-cd "$tmp"
-
-app_list=""
-for f in ./system/priv-app/*; do
-    app_list="${app_list} /system/priv-app/$(basename $f)"
-done
-
-print "Clean files..."
-rm -rf $app_list
-
-print "Adding files..."
-cp -R ./system/priv-app/* /system/priv-app/ || abort "Failed copy apps"
-
-print "Setting correct permissions..."
-for f in $app_list; do
-    print "Fixing permission: $f"
-    setperm 0755 0644 $f
-done
+print "Clean up AppOpsX..."
+rm -rf /system/priv-app/AppOpsX
+rm -rf /data/data/com.zzzmode.appopsx.sys
+rm -rf /data/app/com.zzzmode.appopsx.sys-*
 
 umount /system
 cleanup
