@@ -2,6 +2,7 @@
 <resources>
   <!-- 致谢名单 -->
   <string-array name="acknowledgments_list">
+    <item>Author: 8enet</item>
     <item>wwsh123</item>
     <item>乱飞的草帽</item>
     <item>whatthefuck</item>
