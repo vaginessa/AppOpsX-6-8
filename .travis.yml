@@ -40,6 +40,7 @@ deploy:
   - appopsx.zip
   - uninstaller.zip
   - package/system/priv-app/AppOpsX/AppOpsX.apk
+  - checksum.txt
   overwrite: true
   skip_cleanup: true
   on:

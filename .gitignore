@@ -10,6 +10,7 @@
 /package/system
 /appopsx.zip
 /uninstaller.zip
+/checksum*
 
 ### OSX template
 *.DS_Store
