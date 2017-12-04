@@ -8,13 +8,13 @@ public class ServiceEntryInfo {
     public String packageName;
     public String serviceName;
     public boolean serviceEnabled;
-    public boolean isBroadcast;
+    public String tag;
 
-    public ServiceEntryInfo(String packageName, String serviceName, boolean enabled, boolean isBroadcast) {
+    public ServiceEntryInfo(String packageName, String serviceName, boolean enabled, String isBroadcast) {
         this.packageName = packageName;
         this.serviceName = serviceName;
         this.serviceEnabled = enabled;
-        this.isBroadcast = isBroadcast;
+        this.tag = isBroadcast;
     }
 
     public void changeStatus() {
@@ -27,7 +27,7 @@ public class ServiceEntryInfo {
                 ", packageName='" + packageName + '\'' +
                 ", serviceName='" + serviceName + '\'' +
                 ", serviceEnabled='" + serviceEnabled + '\'' +
-                ", isBroadcast='" + isBroadcast + '\'' +
+                ", tag='" + tag + '\'' +
                 '}';
     }
 }

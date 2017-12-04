@@ -34,5 +34,15 @@
     <item>zh-tw</item>
     <item>en</item>
   </string-array>
+  <string-array name="ifw_block_type_display">
+    <item>@string/ifw_type_service</item>
+    <item>@string/ifw_type_broadcast</item>
+    <item>@string/ifw_type_activity</item>
+  </string-array>
+  <string-array name="ifw_block_type">
+    <item>service</item>
+    <item>broadcast</item>
+    <item>activity</item>
+  </string-array>
 
 </resources>

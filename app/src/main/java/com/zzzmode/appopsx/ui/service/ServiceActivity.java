@@ -3,6 +3,7 @@ package com.zzzmode.appopsx.ui.service;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -11,6 +12,8 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.preference.Preference;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -23,11 +26,17 @@ import android.widget.Toast;
 
 import com.zzzmode.appopsx.R;
 import com.zzzmode.appopsx.ui.BaseActivity;
+import com.zzzmode.appopsx.ui.analytics.AEvent;
+import com.zzzmode.appopsx.ui.analytics.ATracker;
 import com.zzzmode.appopsx.ui.core.Helper;
+import com.zzzmode.appopsx.ui.core.LangHelper;
 import com.zzzmode.appopsx.ui.model.AppInfo;
 import com.zzzmode.appopsx.ui.model.ServiceEntryInfo;
 import com.zzzmode.appopsx.ui.widget.CommonDivderDecorator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,6 +169,49 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
         }
     }
 
+    private int getBlockTypeIndex() {
+        String nowType = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .getString("key_ifw_block_type", "service");
+        List<String> typeList = Arrays.asList(getResources().getStringArray(R.array.ifw_block_type));
+        int defSelected = typeList.indexOf(nowType);
+        if (defSelected < 0) {
+            defSelected = 0;
+        }
+        return defSelected;
+    }
+
+    private void showBlockTypeDialog() {
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(this);
+        builder.setTitle(R.string.menu_show_broadcast);
+
+        final int[] selected = new int[1];
+        final int lastSelected = getBlockTypeIndex();
+
+        builder.setSingleChoiceItems(R.array.ifw_block_type_display, lastSelected,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selected[0] = which;
+                    }
+                });
+
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (selected[0] != lastSelected) {
+                    String blockType = getResources().getStringArray(R.array.ifw_block_type)[selected[0]];
+                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit()
+                            .putString("key_ifw_block_type", blockType).apply();
+                    ActivityCompat.invalidateOptionsMenu(ServiceActivity.this);
+                    mPresenter.load();
+                }
+            }
+        });
+        builder.show();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -178,6 +230,9 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
             case R.id.action_service_app_info:
                 startAppinfo();
                 break;
+            case R.id.action_show_broadcast:
+                showBlockTypeDialog();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -191,13 +246,11 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
         getMenuInflater().inflate(R.menu.service_menu, menu);
 
         MenuItem menuShowFullname = menu.findItem(R.id.action_show_full_name);
-        MenuItem menuShowBroadcast = menu.findItem(R.id.action_show_broadcast);
 
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 
         final Map<MenuItem, String> menus = new HashMap<>();
         menus.put(menuShowFullname, "key_show_full_name");
-        menus.put(menuShowBroadcast, "key_show_broadcast");
 
         MenuItem.OnMenuItemClickListener itemClickListener = new MenuItem.OnMenuItemClickListener() {
             @Override
@@ -222,6 +275,13 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
         return true;
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem menuBlockType = menu.findItem(R.id.action_show_broadcast);
+        menuBlockType.setTitle(getString(R.string.menu_block_type,
+                getResources().getStringArray(R.array.ifw_block_type_display)[getBlockTypeIndex()]));
+        return true;
+    }
 
     private void showHidePerms() {
 

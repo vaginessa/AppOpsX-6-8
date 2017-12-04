@@ -9,7 +9,6 @@
     <item
         android:id="@+id/action_show_broadcast"
         app:showAsAction="never"
-        android:checkable="true"
         android:title="@string/menu_show_broadcast"/>
     <item
         android:id="@+id/action_service_enable_all"

@@ -47,7 +47,7 @@ class ServicePresenter {
     void load() {
     observable = Helper.getAppServices(context, appInfo.packageName,
             PreferenceManager.getDefaultSharedPreferences(context)
-                    .getBoolean("key_show_broadcast", false));
+                    .getString("key_ifw_block_type", "service"));
 
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

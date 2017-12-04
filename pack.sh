@@ -3,7 +3,7 @@
 set -e
 
 cd "$(dirname "$0")"
-./gradlew clean build
+[[ "$1" == "debug" ]] && ./gradlew build || ./gradlew clean build
 
 cd package
 TARGET=../appopsx.zip

@@ -13,7 +13,8 @@
   <string name="menu_open_all">Allow all permissions</string>
   <string name="menu_close_all">Ignore all permissions</string>
   <string name="menu_show_full_name">Display full name</string>
-  <string name="menu_show_broadcast">Display broadcasts</string>
+  <string name="menu_show_broadcast">Choose block type</string>
+  <string name="menu_block_type">Block type: %1$s</string>
   <string name="menu_service_enable_all">Enable all</string>
   <string name="menu_service_disable_all">Disable all</string>
   <string name="open_all_perms">Allow all</string>
@@ -116,4 +117,7 @@
   <string name="ifw_disable_title">Disable services</string>
   <string name="ifw_disable_summary">Use ifw.xml (Intent Firewall) to disable services and broadcasts. Long press app to show the service list.</string>
   <string name="ifw_disabled_hint">\"Disable services\" feature is disabled. Please enable it in settings.</string>
+  <string name="ifw_type_service">Service</string>
+  <string name="ifw_type_broadcast">Broadcast</string>
+  <string name="ifw_type_activity">Activity</string>
 </resources>

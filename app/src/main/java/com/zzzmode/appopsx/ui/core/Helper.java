@@ -82,6 +82,7 @@ import io.reactivex.internal.operators.single.SingleJust;
 import io.reactivex.observers.ResourceSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
+import static android.content.pm.PackageManager.GET_ACTIVITIES;
 import static android.content.pm.PackageManager.GET_RECEIVERS;
 import static android.content.pm.PackageManager.GET_SERVICES;
 
@@ -1326,7 +1327,7 @@ public class Helper {
         String name = "";
         Map<String, Set<String>> outList = new LinkedHashMap<>();
         while ((line = reader.readLine()) != null) {
-          final Pattern startLine = Pattern.compile("<([\\w]+)\\s+block=\"true\"\\s+log=\"false\">");
+          final Pattern startLine = Pattern.compile("<([\\w]+)\\s+(?:\\w+=\"\\w+\"\\s*)*>");
           Matcher m = startLine.matcher(line);
           if (m.matches()) {
             name = m.group(1);
@@ -1353,13 +1354,12 @@ public class Helper {
 
   private static Map<String, Boolean> getServiceDisabledMap(final Context context,
                                                             final String packageName,
-                                                            final boolean isBroadcast) throws IOException {
+                                                            final String tag) throws IOException {
     File xmlFile = new File(BFileUtils.getBackupDir(context), xmlBackupName);
     xmlDictInit(xmlFile);
     Map<String, Boolean> result = new HashMap<>();
-    String key = isBroadcast ? "broadcast" : "service";
-    if (xmlDict != null && xmlDict.containsKey(key)) {
-      Map<String, Set<String>> allServices = xmlDict.get(key);
+    if (xmlDict != null && xmlDict.containsKey(tag)) {
+      Map<String, Set<String>> allServices = xmlDict.get(tag);
       if (allServices.containsKey(packageName)) {
         Set<String> serviceSet = allServices.get(packageName);
         String[] disabledServices = serviceSet.toArray(new String[serviceSet.size()]);
@@ -1378,7 +1378,7 @@ public class Helper {
     if (infos != null && !infos.isEmpty()) {
       for (ServiceEntryInfo info: infos) {
         Map<String, Set<String>> disabledServices = new LinkedHashMap<>();
-        String key = info.isBroadcast ? "broadcast" : "service";
+        String key = info.tag;
         if (xmlDict.containsKey(key)) {
           disabledServices = xmlDict.get(key);
         } else {
@@ -1469,19 +1469,28 @@ public class Helper {
 
   public static Observable<List<ServiceEntryInfo>> getAppServices(final Context context,
                                                                   final String packageName,
-                                                                  final boolean isBroadcast) {
+                                                                  final String tag) {
     return Observable.create(new ObservableOnSubscribe<List<ServiceEntryInfo>>() {
       @Override
       public void subscribe(ObservableEmitter<List<ServiceEntryInfo>> e) throws Exception {
         PackageManager packageManager = context.getPackageManager();
-        PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_RECEIVERS | GET_SERVICES);
-        ComponentInfo[] services = isBroadcast ? packageInfo.receivers : packageInfo.services;
+        PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_RECEIVERS | GET_SERVICES | GET_ACTIVITIES);
+        ComponentInfo[] services = packageInfo.services;
+        String myTag = tag;
+        if (tag.equals("activity")) {
+          services = packageInfo.activities;
+        } else if (tag.equals("broadcast")) {
+          services = packageInfo.receivers;
+        } else {
+          myTag = "service";
+        }
+
         List<ServiceEntryInfo> list = new ArrayList<>();
         if (services != null) {
-          Map<String, Boolean> disabledMap = getServiceDisabledMap(context, packageName, isBroadcast);
+          Map<String, Boolean> disabledMap = getServiceDisabledMap(context, packageName, myTag);
           for (ComponentInfo s: services) {
             list.add(new ServiceEntryInfo(packageName, s.name,
-                    getOrDefault(disabledMap, s.name, true), isBroadcast));
+                    getOrDefault(disabledMap, s.name, true), myTag));
           }
           Collections.sort(list, new Comparator<ServiceEntryInfo>() {
             private String getShort(String s) {

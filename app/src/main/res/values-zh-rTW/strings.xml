@@ -109,11 +109,15 @@
   <string name="perms_count">%1$s (已使用 %2$d 次)</string>
   <string name="menu_service_disable_all">全部禁用</string>
   <string name="menu_service_enable_all">全部啓用</string>
-  <string name="menu_show_broadcast">顯示廣播</string>
+  <string name="menu_show_broadcast">選擇屏蔽類型</string>
   <string name="menu_show_full_name">顯示全稱</string>
   <string name="no_services">此應用沒有使用任何服務</string>
   <string name="toast_error">錯誤</string>
   <string name="ifw_disable_title">禁用服務</string>
   <string name="ifw_disable_summary">使用 ifw.xml (Intent 防火牆) 禁用服務和廣播，長按程式項以顯示服務列表。</string>
   <string name="ifw_disabled_hint">禁用服務功能已關閉，請在設置中開啓。</string>
+    <string name="ifw_type_service">服務</string>
+  <string name="ifw_type_broadcast">廣播</string>
+  <string name="ifw_type_activity">活動</string>
+  <string name="menu_block_type">屏蔽類型: %1$s</string>
 </resources>
