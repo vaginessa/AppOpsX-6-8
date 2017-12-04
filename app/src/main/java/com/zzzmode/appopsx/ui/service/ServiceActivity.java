@@ -187,6 +187,7 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
 
         final int[] selected = new int[1];
         final int lastSelected = getBlockTypeIndex();
+        selected[0] = lastSelected;
 
         builder.setSingleChoiceItems(R.array.ifw_block_type_display, lastSelected,
                 new DialogInterface.OnClickListener() {
