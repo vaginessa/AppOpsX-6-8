@@ -1327,18 +1327,19 @@ public class Helper {
         String name = "";
         Map<String, Set<String>> outList = new LinkedHashMap<>();
         while ((line = reader.readLine()) != null) {
+          String trimedLine = line.trim();
           final Pattern startLine = Pattern.compile("<([\\w]+)\\s+(?:\\w+=\"\\w+\"\\s*)*>");
-          Matcher m = startLine.matcher(line);
+          Matcher m = startLine.matcher(trimedLine);
           if (m.matches()) {
             name = m.group(1);
             outList = new LinkedHashMap<>();
           }
-          if (line.contains("</" + name + ">")) {
+          if (trimedLine.contains("</" + name + ">")) {
             xmlDict.put(name.toLowerCase(), outList);
             continue;
           }
           final Pattern filterLine = Pattern.compile("<component-filter\\s+name=\"([^\"]+)\"\\s/>");
-          m = filterLine.matcher(line);
+          m = filterLine.matcher(trimedLine);
           if (m.matches()) {
             String[] ident = m.group(1).split("/");
             if (ident.length > 1) {
