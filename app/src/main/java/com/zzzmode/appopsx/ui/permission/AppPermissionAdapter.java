@@ -65,7 +65,7 @@ class AppPermissionAdapter extends RecyclerView.Adapter<AppPermissionAdapter.Vie
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
     OpEntryInfo opEntryInfo = datas.get(position);
-    holder.itemView.setOnClickListener(this);
+//    holder.itemView.setOnClickListener(this);
     holder.itemView.setTag(holder);
 
     holder.switchCompat.setTag(opEntryInfo);

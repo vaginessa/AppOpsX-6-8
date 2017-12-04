@@ -69,7 +69,7 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
     ServiceEntryInfo opEntryInfo = datas.get(position);
-    holder.itemView.setOnClickListener(this);
+//    holder.itemView.setOnClickListener(this);
     holder.itemView.setOnLongClickListener(this);
     holder.itemView.setTag(holder);
 
