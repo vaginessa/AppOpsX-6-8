@@ -313,6 +313,8 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
         mProgressBar.setVisibility(View.GONE);
         tvError.setVisibility(View.VISIBLE);
         tvError.setText(text);
+        adapter.setDatas(Collections.<ServiceEntryInfo>emptyList());
+        adapter.notifyDataSetChanged();
 
         ActivityCompat.invalidateOptionsMenu(ServiceActivity.this);
     }
