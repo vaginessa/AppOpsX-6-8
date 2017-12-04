@@ -111,7 +111,7 @@
   <string name="menu_service_enable_all">全部啓用</string>
   <string name="menu_show_broadcast">選擇屏蔽類型</string>
   <string name="menu_show_full_name">顯示全稱</string>
-  <string name="no_services">此應用沒有使用任何服務</string>
+  <string name="no_services">\n\t此應用沒有使用任何%1$s</string>
   <string name="toast_error">錯誤</string>
   <string name="ifw_disable_title">禁用服務</string>
   <string name="ifw_disable_summary">使用 ifw.xml (Intent 防火牆) 禁用服務和廣播，長按程式項以顯示服務列表。</string>

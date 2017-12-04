@@ -11,6 +11,7 @@ import com.zzzmode.appopsx.ui.model.ServiceEntryInfo;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -47,7 +48,8 @@ class ServicePresenter {
     void load() {
     observable = Helper.getAppServices(context, appInfo.packageName,
             PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString("key_ifw_block_type", "service"));
+                    .getString(ServiceActivity.KEY_BLOCK_TYPE,
+                               ServiceActivity.DEFAULT_BLOCK_TYPE));
 
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -65,7 +67,8 @@ class ServicePresenter {
                             mView.showProgress(false);
                             mView.showServices(opEntryInfos);
                         } else {
-                            mView.showError(context.getString(R.string.no_services));
+                            mView.showError(context.getString(R.string.no_services,
+                                    ServiceActivity.getBlockTypeString(context).toLowerCase(Locale.US)));
                         }
                         loadSuccess = true;
                     }

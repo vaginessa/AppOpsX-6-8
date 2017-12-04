@@ -20,7 +20,7 @@
   <string name="open_all_perms">Allow all</string>
   <string name="close_all_perms">Ignore all</string>
   <string name="no_perms">The app doesn\'t ask for any permissions</string>
-  <string name="no_services">The app doesn\'t have any services</string>
+  <string name="no_services">\n\tThe app doesn\'t have any %1$s</string>
   <string name="about">About</string>
   <string name="version">Version</string>
   <string name="normal">General</string>

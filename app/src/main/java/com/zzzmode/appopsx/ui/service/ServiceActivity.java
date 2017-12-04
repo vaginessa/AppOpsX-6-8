@@ -58,6 +58,8 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
     public static final String EXTRA_APP = "extra.app";
     public static final String EXTRA_APP_PKGNAME = "pkgName";
     public static final String EXTRA_APP_NAME = "appName";
+    public static final String KEY_BLOCK_TYPE = "key_ifw_block_type";
+    public static final String DEFAULT_BLOCK_TYPE = "service";
 
 
     private ProgressBar mProgressBar;
@@ -169,10 +171,10 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
         }
     }
 
-    private int getBlockTypeIndex() {
-        String nowType = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
-                .getString("key_ifw_block_type", "service");
-        List<String> typeList = Arrays.asList(getResources().getStringArray(R.array.ifw_block_type));
+    public static int getBlockTypeIndex(Context context) {
+        String nowType = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_BLOCK_TYPE, DEFAULT_BLOCK_TYPE);
+        List<String> typeList = Arrays.asList(context.getResources().getStringArray(R.array.ifw_block_type));
         int defSelected = typeList.indexOf(nowType);
         if (defSelected < 0) {
             defSelected = 0;
@@ -180,36 +182,31 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
         return defSelected;
     }
 
+    public static String getBlockTypeString(Context context) {
+        return context.getResources()
+                .getStringArray(R.array.ifw_block_type_display)[getBlockTypeIndex(context)];
+    }
+
     private void showBlockTypeDialog() {
         AlertDialog.Builder builder =
                 new AlertDialog.Builder(this);
         builder.setTitle(R.string.menu_show_broadcast);
 
-        final int[] selected = new int[1];
-        final int lastSelected = getBlockTypeIndex();
-        selected[0] = lastSelected;
-
+        final int lastSelected = getBlockTypeIndex(getApplicationContext());
         builder.setSingleChoiceItems(R.array.ifw_block_type_display, lastSelected,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        selected[0] = which;
+                        dialog.dismiss();
+                        if (which != lastSelected) {
+                            String blockType = getResources().getStringArray(R.array.ifw_block_type)[which];
+                            PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit()
+                                    .putString(KEY_BLOCK_TYPE, blockType).apply();
+                            ActivityCompat.invalidateOptionsMenu(ServiceActivity.this);
+                            mPresenter.load();
+                        }
                     }
                 });
-
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (selected[0] != lastSelected) {
-                    String blockType = getResources().getStringArray(R.array.ifw_block_type)[selected[0]];
-                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit()
-                            .putString("key_ifw_block_type", blockType).apply();
-                    ActivityCompat.invalidateOptionsMenu(ServiceActivity.this);
-                    mPresenter.load();
-                }
-            }
-        });
         builder.show();
     }
 
@@ -280,7 +277,7 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem menuBlockType = menu.findItem(R.id.action_show_broadcast);
         menuBlockType.setTitle(getString(R.string.menu_block_type,
-                getResources().getStringArray(R.array.ifw_block_type_display)[getBlockTypeIndex()]));
+                getBlockTypeString(getApplicationContext())));
         return true;
     }
 
