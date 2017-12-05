@@ -3,14 +3,6 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-
-  <android.support.v7.widget.RecyclerView
-    android:id="@+id/recyclerView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:overScrollMode="never"
-    android:scrollbars="vertical"/>
-
   <TextView
     android:id="@+id/tv_error"
     android:layout_width="wrap_content"
@@ -38,6 +30,34 @@
     android:minHeight="24dp"
     android:minWidth="24dp"
     android:visibility="invisible"/>
+
+  <FrameLayout
+      android:id="@+id/container_app"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never"
+        android:scrollbars="vertical"/>
+  </FrameLayout>
+
+  <FrameLayout
+      android:id="@+id/container_search"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="gone"
+      >
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/search_result_recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never"
+        android:scrollbars="vertical"
+        android:splitMotionEvents="false"/>
+  </FrameLayout>
 
 </FrameLayout>
 

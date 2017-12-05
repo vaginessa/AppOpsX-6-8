@@ -23,12 +23,12 @@ import java.util.List;
 class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> implements
     View.OnClickListener, CompoundButton.OnCheckedChangeListener, View.OnLongClickListener {
 
-  private List<ServiceEntryInfo> datas = new ArrayList<>();
+  protected List<ServiceEntryInfo> datas = new ArrayList<>();
   private IServiceCopy copier;
 
   private OnSwitchItemClickListener listener;
 
-  private boolean showFullName;
+  protected boolean showFullName;
   private boolean switchEnabled;
   private int HIGHLIGHT_COLOR = Color.BLUE;
   private int DISABLED_COLOR = Color.RED;
@@ -64,6 +64,13 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
     this.copier = copier;
   }
 
+  protected CharSequence processText(String name) {
+    return name;
+  }
+  protected boolean textShouldBeProcessed() {
+    return false;
+  }
+
 
   @Override
   public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -87,29 +94,35 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
     if (opEntryInfo != null) {
       if (opEntryInfo.serviceName != null) {
         String[] shortNames = opEntryInfo.serviceName.split("\\.");
-        holder.title.setText(shortNames[shortNames.length - 1]);
-        switch (opEntryInfo.isRunning) {
-          case DISABLED:
-            holder.title.setTextColor(DISABLED_COLOR);
-            break;
-          case NOT_RUNNING:
-            break;
-          case RUNNING:
-            holder.title.setTextColor(HIGHLIGHT_COLOR);
-            holder.title.setTypeface(null, Typeface.BOLD);
-            break;
-          case PERSISTENT:
-            holder.title.setTextColor(HIGHLIGHT_COLOR);
-            holder.title.setTypeface(null, Typeface.ITALIC);
-            break;
-          case FOREGROUND:
-            holder.title.setTextColor(HIGHLIGHT_COLOR);
-            holder.title.setTypeface(null, Typeface.BOLD_ITALIC);
-            break;
+        String titleText = shortNames[shortNames.length - 1];
+        if (textShouldBeProcessed()) {
+          holder.title.setText(processText(titleText));
+        } else {
+          holder.title.setText(titleText);
+          switch (opEntryInfo.isRunning) {
+            case DISABLED:
+              holder.title.setTextColor(DISABLED_COLOR);
+              break;
+            case NOT_RUNNING:
+              break;
+            case RUNNING:
+              holder.title.setTextColor(HIGHLIGHT_COLOR);
+              holder.title.setTypeface(null, Typeface.BOLD);
+              break;
+            case PERSISTENT:
+              holder.title.setTextColor(HIGHLIGHT_COLOR);
+              holder.title.setTypeface(null, Typeface.ITALIC);
+              break;
+            case FOREGROUND:
+              holder.title.setTextColor(HIGHLIGHT_COLOR);
+              holder.title.setTypeface(null, Typeface.BOLD_ITALIC);
+              break;
+          }
         }
+
         if (showFullName) {
           holder.summary.setVisibility(View.VISIBLE);
-          holder.summary.setText(opEntryInfo.serviceName);
+          holder.summary.setText(processText(opEntryInfo.serviceName));
         } else {
           holder.summary.setVisibility(View.GONE);
         }
