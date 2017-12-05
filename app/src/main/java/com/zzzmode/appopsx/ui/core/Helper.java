@@ -1462,6 +1462,9 @@ public class Helper {
               ActivityManager.RunningServiceInfo.FLAG_FOREGROUND) != 0) {
         status = ServiceEntryInfo.RunningStatus.FOREGROUND;
       }
+      if (!service.started && service.clientLabel == 0) {
+        status = ServiceEntryInfo.RunningStatus.NOT_RUNNING;
+      }
       result.put(packageName + "/" + runningName, status);
     }
     return result;
@@ -1602,8 +1605,27 @@ public class Helper {
               return shortNames[shortNames.length - 1];
             }
 
+            private boolean isRunning(ServiceEntryInfo.RunningStatus s) {
+              return (s == ServiceEntryInfo.RunningStatus.RUNNING ||
+                      s == ServiceEntryInfo.RunningStatus.FOREGROUND);
+            }
+
             @Override
             public int compare(ServiceEntryInfo o1, ServiceEntryInfo o2) {
+              if (o1.isRunning == ServiceEntryInfo.RunningStatus.DISABLED &&
+                      o2.isRunning != ServiceEntryInfo.RunningStatus.DISABLED) {
+                return -1;
+              }
+              if (o1.isRunning != ServiceEntryInfo.RunningStatus.DISABLED &&
+                      o2.isRunning == ServiceEntryInfo.RunningStatus.DISABLED) {
+                return 1;
+              }
+              if (isRunning(o1.isRunning) && !isRunning(o2.isRunning)) {
+                return -1;
+              }
+              if (!isRunning(o1.isRunning) && isRunning(o2.isRunning)) {
+                return 1;
+              }
               String s1 = getShort(o1.serviceName);
               String s2 = getShort(o2.serviceName);
               return s1.compareTo(s2);

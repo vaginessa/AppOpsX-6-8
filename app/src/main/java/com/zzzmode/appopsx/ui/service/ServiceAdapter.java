@@ -110,8 +110,6 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
               holder.title.setTypeface(null, Typeface.BOLD);
               break;
             case PERSISTENT:
-              holder.title.setTextColor(HIGHLIGHT_COLOR);
-              holder.title.setTypeface(null, Typeface.ITALIC);
               break;
             case FOREGROUND:
               holder.title.setTextColor(HIGHLIGHT_COLOR);
