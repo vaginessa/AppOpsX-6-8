@@ -1,5 +1,7 @@
 package com.zzzmode.appopsx.ui.service;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
@@ -28,6 +30,8 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
 
   private boolean showFullName;
   private boolean switchEnabled;
+  private int HIGHLIGHT_COLOR = Color.BLUE;
+  private int DISABLED_COLOR = Color.RED;
 
   void setShowConfig(boolean showFullName, boolean enabled) {
     this.showFullName = showFullName;
@@ -76,11 +80,33 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
     holder.switchCompat.setTag(opEntryInfo);
     holder.summary.setVisibility(View.GONE);
     holder.lastTime.setVisibility(View.GONE);
+    holder.title.setTypeface(null, Typeface.NORMAL);
+    int defaultColor = copier.getDefaultColor();
+    holder.title.setTextColor(defaultColor);
 
     if (opEntryInfo != null) {
       if (opEntryInfo.serviceName != null) {
         String[] shortNames = opEntryInfo.serviceName.split("\\.");
         holder.title.setText(shortNames[shortNames.length - 1]);
+        switch (opEntryInfo.isRunning) {
+          case DISABLED:
+            holder.title.setTextColor(DISABLED_COLOR);
+            break;
+          case NOT_RUNNING:
+            break;
+          case RUNNING:
+            holder.title.setTextColor(HIGHLIGHT_COLOR);
+            holder.title.setTypeface(null, Typeface.BOLD);
+            break;
+          case PERSISTENT:
+            holder.title.setTextColor(HIGHLIGHT_COLOR);
+            holder.title.setTypeface(null, Typeface.ITALIC);
+            break;
+          case FOREGROUND:
+            holder.title.setTextColor(HIGHLIGHT_COLOR);
+            holder.title.setTypeface(null, Typeface.BOLD_ITALIC);
+            break;
+        }
         if (showFullName) {
           holder.summary.setVisibility(View.VISIBLE);
           holder.summary.setText(opEntryInfo.serviceName);
@@ -151,5 +177,6 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
 
   public interface IServiceCopy {
     void copyToPasteboard(String serviceName);
+    int getDefaultColor();
   }
 }

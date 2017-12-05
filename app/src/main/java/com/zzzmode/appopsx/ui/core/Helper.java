@@ -1,7 +1,10 @@
 package com.zzzmode.appopsx.ui.core;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.IActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -53,6 +56,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1435,7 +1439,64 @@ public class Helper {
     i.putExtra("VERSION", "1");
     Uri contentUri = FileProvider.getUriForFile(context, "com.zzzmode.appopsx.fileprovider", transfer);
     i.setData(contentUri);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      ComponentName cn=
+              new ComponentName("android", "com.android.server.updates.IntentFirewallInstallReceiver");
+      i.setComponent(cn);
+    }
     context.sendBroadcast(i);
+  }
+
+  public static Map<String, ServiceEntryInfo.RunningStatus> getRunningServiceMap(Context context) {
+    Map<String, ServiceEntryInfo.RunningStatus> result = new HashMap<>();
+    ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+    for (ActivityManager.RunningServiceInfo service : getServices(manager)) {
+      String runningName = service.service.getClassName();
+      String packageName = service.service.getPackageName();
+      ServiceEntryInfo.RunningStatus status = ServiceEntryInfo.RunningStatus.RUNNING;
+      if ((service.flags &
+              ActivityManager.RunningServiceInfo.FLAG_PERSISTENT_PROCESS) != 0) {
+        status = ServiceEntryInfo.RunningStatus.PERSISTENT;
+      } else if ((service.flags &
+              ActivityManager.RunningServiceInfo.FLAG_FOREGROUND) != 0) {
+        status = ServiceEntryInfo.RunningStatus.FOREGROUND;
+      }
+      result.put(packageName + "/" + runningName, status);
+    }
+    return result;
+  }
+
+  @SuppressWarnings("deprecation")
+  private static List<ActivityManager.RunningServiceInfo> getServices(ActivityManager manager) {
+    return manager.getRunningServices(Integer.MAX_VALUE);
+  }
+
+  @SuppressWarnings("deprecation")
+  private static List<ActivityManager.RunningServiceInfo> getServicesOreo(ActivityManager manager) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      try {
+        /* On Android 8.0 or above, we need permission INTERACT_ACROSS_USERS_FULL to get
+         * the information of all running services:
+         *
+         *     https://github.com/aosp-mirror/platform_frameworks_base/commit/290e57886db79fb83df61ce00636609b6c03c67f
+         *
+         * However, this permission is limited to "signature" or "installer" level, which is
+         * nearly impossible to get in normal apps:
+         *
+         *     https://github.com/aosp-mirror/platform_frameworks_base/blob/oreo-release/core/res/AndroidManifest.xml#L1768
+         */
+        Class<ActivityManager> c = ActivityManager.class;
+        Method method = c.getMethod("getService");
+        method.setAccessible(true);
+        IActivityManager im = (IActivityManager) method.invoke(manager);
+        return im.getServices(Integer.MAX_VALUE, 0);
+      } catch (Exception e) {
+        e.printStackTrace();
+        return Collections.emptyList();
+      }
+    } else {
+      return manager.getRunningServices(Integer.MAX_VALUE);
+    }
   }
 
   public static Observable<Boolean> setService(final Context context, final String pkgName,
@@ -1478,20 +1539,34 @@ public class Helper {
         PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_RECEIVERS | GET_SERVICES | GET_ACTIVITIES);
         ComponentInfo[] services = packageInfo.services;
         String myTag = tag;
+        boolean isService = false;
         if (tag.equals("activity")) {
           services = packageInfo.activities;
         } else if (tag.equals("broadcast")) {
           services = packageInfo.receivers;
         } else {
           myTag = "service";
+          isService = true;
         }
 
         List<ServiceEntryInfo> list = new ArrayList<>();
         if (services != null) {
           Map<String, Boolean> disabledMap = getServiceDisabledMap(context, packageName, myTag);
+          Map<String, ServiceEntryInfo.RunningStatus> runningMap = Collections.emptyMap();
+          if (isService) {
+            runningMap = getRunningServiceMap(context);
+          }
           for (ComponentInfo s: services) {
+            ServiceEntryInfo.RunningStatus status = ServiceEntryInfo.RunningStatus.NOT_RUNNING;
+            if (!s.enabled) {
+              status = ServiceEntryInfo.RunningStatus.DISABLED;
+            }
+            if (isService) {
+              status = getOrDefault(runningMap,
+                      s.packageName + "/" + s.name, status);
+            }
             list.add(new ServiceEntryInfo(packageName, s.name,
-                    getOrDefault(disabledMap, s.name, true), myTag));
+                    getOrDefault(disabledMap, s.name, true), myTag, status));
           }
           Collections.sort(list, new Comparator<ServiceEntryInfo>() {
             private String getShort(String s) {
