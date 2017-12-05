@@ -6,21 +6,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.annotation.AttrRes;
-import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -349,23 +344,5 @@ public class ServiceActivity extends BaseActivity implements IServiceView, Servi
         ClipData clip = ClipData.newPlainText("Service", serviceName);
         clipboard.setPrimaryClip(clip);
         Toast.makeText(ctx, ctx.getString(R.string.copied_hint), Toast.LENGTH_SHORT).show();
-    }
-
-    public static TypedValue resolveThemeAttr(Context context, @AttrRes int attrRes) {
-        Resources.Theme theme = context.getTheme();
-        TypedValue typedValue = new TypedValue();
-        theme.resolveAttribute(attrRes, typedValue, true);
-        return typedValue;
-    }
-
-    @ColorInt public static int resolveColorAttr(Context context, @AttrRes int colorAttr) {
-        TypedValue resolvedAttr = resolveThemeAttr(context, colorAttr);
-        int colorRes = resolvedAttr.resourceId != 0 ? resolvedAttr.resourceId : resolvedAttr.data;
-        return ContextCompat.getColor(context, colorRes);
-    }
-
-    @Override
-    public int getDefaultColor() {
-        return resolveColorAttr(getApplicationContext(), android.R.attr.textColorPrimary);
     }
 }

@@ -87,6 +87,7 @@ import io.reactivex.observers.ResourceSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
 import static android.content.pm.PackageManager.GET_ACTIVITIES;
+import static android.content.pm.PackageManager.GET_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.GET_RECEIVERS;
 import static android.content.pm.PackageManager.GET_SERVICES;
 
@@ -1536,17 +1537,31 @@ public class Helper {
       @Override
       public void subscribe(ObservableEmitter<List<ServiceEntryInfo>> e) throws Exception {
         PackageManager packageManager = context.getPackageManager();
-        PackageInfo packageInfo = packageManager.getPackageInfo(packageName, GET_RECEIVERS | GET_SERVICES | GET_ACTIVITIES);
-        ComponentInfo[] services = packageInfo.services;
+        int flag = GET_SERVICES;
         String myTag = tag;
         boolean isService = false;
         if (tag.equals("activity")) {
-          services = packageInfo.activities;
+          flag = GET_ACTIVITIES;
         } else if (tag.equals("broadcast")) {
-          services = packageInfo.receivers;
+          flag = GET_RECEIVERS;
         } else {
           myTag = "service";
           isService = true;
+        }
+
+        PackageInfo packageInfo = packageManager.getPackageInfo(packageName,
+                flag | GET_DISABLED_COMPONENTS);
+        ComponentInfo[] services;
+        switch (flag) {
+          case GET_ACTIVITIES:
+            services = packageInfo.activities;
+            break;
+          case GET_RECEIVERS:
+            services = packageInfo.receivers;
+            break;
+          default:
+            services = packageInfo.services;
+            break;
         }
 
         List<ServiceEntryInfo> list = new ArrayList<>();
@@ -1558,7 +1573,20 @@ public class Helper {
           }
           for (ComponentInfo s: services) {
             ServiceEntryInfo.RunningStatus status = ServiceEntryInfo.RunningStatus.NOT_RUNNING;
-            if (!s.enabled) {
+            ComponentName compName = new ComponentName(s.packageName, s.name);
+            int state = packageManager.getComponentEnabledSetting(compName);
+            boolean isDisabled = true;
+            switch (state) {
+              case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                isDisabled = false;
+                break;
+              case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                isDisabled = !s.enabled;
+                break;
+              default:
+                break;
+            }
+            if (isDisabled) {
               status = ServiceEntryInfo.RunningStatus.DISABLED;
             }
             if (isService) {

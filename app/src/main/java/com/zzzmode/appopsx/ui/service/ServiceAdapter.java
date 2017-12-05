@@ -32,6 +32,7 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
   private boolean switchEnabled;
   private int HIGHLIGHT_COLOR = Color.BLUE;
   private int DISABLED_COLOR = Color.RED;
+  private int DEFAULT_COLOR = 0xFF212121;
 
   void setShowConfig(boolean showFullName, boolean enabled) {
     this.showFullName = showFullName;
@@ -81,8 +82,7 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
     holder.summary.setVisibility(View.GONE);
     holder.lastTime.setVisibility(View.GONE);
     holder.title.setTypeface(null, Typeface.NORMAL);
-    int defaultColor = copier.getDefaultColor();
-    holder.title.setTextColor(defaultColor);
+    holder.title.setTextColor(DEFAULT_COLOR);
 
     if (opEntryInfo != null) {
       if (opEntryInfo.serviceName != null) {
@@ -177,6 +177,5 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
 
   public interface IServiceCopy {
     void copyToPasteboard(String serviceName);
-    int getDefaultColor();
   }
 }
