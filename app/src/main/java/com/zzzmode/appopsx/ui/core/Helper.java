@@ -1626,6 +1626,12 @@ public class Helper {
               if (!isRunning(o1.isRunning) && isRunning(o2.isRunning)) {
                 return 1;
               }
+              if (o1.serviceEnabled && !o2.serviceEnabled) {
+                return 1;
+              }
+              if (!o1.serviceEnabled && o2.serviceEnabled) {
+                return -1;
+              }
               String s1 = getShort(o1.serviceName);
               String s2 = getShort(o2.serviceName);
               return s1.compareTo(s2);
