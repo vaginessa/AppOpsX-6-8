@@ -1,9 +1,12 @@
 package com.zzzmode.appopsx.ui.main;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
@@ -95,6 +98,16 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
         loadData(false);
       }
     });
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+       if (ActivityCompat.checkSelfPermission(this,
+              Manifest.permission.WRITE_EXTERNAL_STORAGE)
+              != PackageManager.PERMISSION_GRANTED) {
+         ActivityCompat.requestPermissions(this,
+                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                 0);
+       }
+    }
   }
 
 

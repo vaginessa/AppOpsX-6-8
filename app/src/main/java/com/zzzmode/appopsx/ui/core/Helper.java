@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.FileProvider;
@@ -91,6 +92,7 @@ import static android.content.pm.PackageManager.GET_ACTIVITIES;
 import static android.content.pm.PackageManager.GET_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.GET_RECEIVERS;
 import static android.content.pm.PackageManager.GET_SERVICES;
+import static com.zzzmode.appopsx.ui.service.ServiceActivity.KEY_IFW_ENABLED;
 
 /**
  * Created by zl on 2017/1/17.
@@ -1315,57 +1317,111 @@ public class Helper {
 
   // IFW xml support
 
-  private static Map<String, Map<String, Set<String>>> xmlDict = null;
-  public static final String xmlBackupName = "ifw_backup.xml";
+  private static final Map<String, Map<String, Set<String>>> xmlDict = new LinkedHashMap<>();
+  private static final String xmlBackupName = "ifw_backup.xml";
+  private static final String[] xmlPersistent = {"Android", "ifw_backup.xml"};
+  private static final String[] xmlInternal = {"ifw", "ifw.xml"};
+  private static final String xmlInternalEmpty = "ifw_empty.xml";
+  private static final Object initLock = new Object();
+  private static boolean xmlInited = false;
 
   private static <K, V> V getOrDefault(Map<K,V> map, K key, V defaultValue) {
     return map.containsKey(key) ? map.get(key) : defaultValue;
   }
 
-  private static void xmlDictInit(final File file) throws IOException {
-    if (xmlDict != null) {
+  private static File getXmlInternal(Context context) {
+    File transferPath = new File(context.getFilesDir(), xmlInternal[0]);
+    if (!transferPath.exists()) {
+      transferPath.mkdir();
+    }
+    return new File(transferPath, xmlInternal[1]);
+  }
+
+  private static File getXmlEmpty(Context context) {
+    File transferPath = new File(context.getFilesDir(), xmlInternal[0]);
+    if (!transferPath.exists()) {
+      transferPath.mkdir();
+    }
+    return new File(transferPath, xmlInternalEmpty);
+  }
+
+  private static File getXmlPersistent() {
+    File persistentDir = new File(Environment.getExternalStorageDirectory(), xmlPersistent[0]);
+    if (!persistentDir.exists()) {
+      persistentDir.mkdir();
+    }
+    return new File(persistentDir, xmlPersistent[1]);
+  }
+
+  private static File getXmlBackup(Context context) {
+    return new File(BFileUtils.getBackupDir(context), xmlBackupName);
+  }
+
+  private static void xmlDictInit(final Context context) throws IOException {
+    if (xmlInited) {
       return;
     }
-    xmlDict = new LinkedHashMap<>();
-    if (file.exists()) {
-      try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-        String line;
-        String name = "";
-        Map<String, Set<String>> outList = new LinkedHashMap<>();
-        while ((line = reader.readLine()) != null) {
-          String trimedLine = line.trim();
-          final Pattern startLine = Pattern.compile("<([\\w]+)\\s+(?:\\w+=\"\\w+\"\\s*)*>");
-          Matcher m = startLine.matcher(trimedLine);
-          if (m.matches()) {
-            name = m.group(1);
-            outList = new LinkedHashMap<>();
-          }
-          if (trimedLine.contains("</" + name + ">")) {
-            xmlDict.put(name.toLowerCase(), outList);
-            continue;
-          }
-          final Pattern filterLine = Pattern.compile("<component-filter\\s+name=\"([^\"]+)\"\\s/>");
-          m = filterLine.matcher(trimedLine);
-          if (m.matches()) {
-            String[] ident = m.group(1).split("/");
-            if (ident.length > 1) {
-              Set<String> services = getOrDefault(outList, ident[0], new LinkedHashSet<String>());
-              services.add(ident[1]);
-              outList.put(ident[0], services);
-            }
+    synchronized (initLock) {
+      if (xmlInited) {
+        return;
+      }
+      xmlInited = true;
+    }
+    File backupFile = getXmlBackup(context);
+    File file = getXmlInternal(context);
+    if (backupFile.exists() && backupFile.canRead()) {
+      file = backupFile;
+    } else if (!file.exists()) {
+      return;
+    }
+    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+      String line;
+      String name = "";
+      Map<String, Set<String>> outList = new LinkedHashMap<>();
+      while ((line = reader.readLine()) != null) {
+        String trimedLine = line.trim();
+        final Pattern startLine = Pattern.compile("<([\\w]+)\\s+(?:\\w+=\"\\w+\"\\s*)*>");
+        Matcher m = startLine.matcher(trimedLine);
+        if (m.matches()) {
+          name = m.group(1);
+          outList = new LinkedHashMap<>();
+        }
+        if (trimedLine.contains("</" + name + ">")) {
+          xmlDict.put(name.toLowerCase(), outList);
+          continue;
+        }
+        final Pattern filterLine = Pattern.compile("<component-filter\\s+name=\"([^\"]+)\"\\s/>");
+        m = filterLine.matcher(trimedLine);
+        if (m.matches()) {
+          String[] ident = m.group(1).split("/");
+          if (ident.length > 1) {
+            Set<String> services = getOrDefault(outList, ident[0], new LinkedHashSet<String>());
+            services.add(ident[1]);
+            outList.put(ident[0], services);
           }
         }
       }
     }
   }
 
+  private static void xmlWriteResult(File[] files, final String result) {
+    for (File file: files) {
+      try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+        writer.write(result);
+      } catch (IOException e) {}
+    }
+  }
+
+  private static void xmlWriteResult(final File file, final String result) {
+    xmlWriteResult(new File[]{file}, result);
+  }
+
   private static Map<String, Boolean> getServiceDisabledMap(final Context context,
                                                             final String packageName,
                                                             final String tag) throws IOException {
-    File xmlFile = new File(BFileUtils.getBackupDir(context), xmlBackupName);
-    xmlDictInit(xmlFile);
+    xmlDictInit(context);
     Map<String, Boolean> result = new HashMap<>();
-    if (xmlDict != null && xmlDict.containsKey(tag)) {
+    if (xmlDict.containsKey(tag)) {
       Map<String, Set<String>> allServices = xmlDict.get(tag);
       if (allServices.containsKey(packageName)) {
         Set<String> serviceSet = allServices.get(packageName);
@@ -1378,10 +1434,11 @@ public class Helper {
     return result;
   }
 
-  private static void updateService(final Context context, final String packageName,
-                                    List<ServiceEntryInfo> infos) throws IOException {
-    File xmlFile = new File(BFileUtils.getBackupDir(context), xmlBackupName);
-    xmlDictInit(xmlFile);
+  private static synchronized void updateService(final Context context, final String packageName,
+                                                 List<ServiceEntryInfo> infos) {
+    try {
+      xmlDictInit(context);
+    } catch (IOException e) {}
     if (infos != null && !infos.isEmpty()) {
       for (ServiceEntryInfo info: infos) {
         Map<String, Set<String>> disabledServices = new LinkedHashMap<>();
@@ -1421,20 +1478,15 @@ public class Helper {
       result.append("</" + label + ">\n");
     }
     result.append("</rules>\n");
-    if (infos != null && !infos.isEmpty()) {
-      try (BufferedWriter writer = new BufferedWriter(new FileWriter(xmlFile))) {
-        writer.write(result.toString());
-      }
-    }
-    File transferPath = new File(context.getFilesDir(), "ifw");
-    if (!transferPath.exists()) {
-      transferPath.mkdir();
-    }
-    File transfer = new File(transferPath, "ifw.xml");
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(transfer))) {
-      boolean ifwEnabled = PreferenceManager.getDefaultSharedPreferences(context)
-              .getBoolean("ifw_enabled", true);
-      writer.write(ifwEnabled ? result.toString() : "<rules>\n</rules>\n");
+    String res = result.toString();
+    File[] allFiles = {getXmlInternal(context), getXmlBackup(context), getXmlPersistent()};
+    xmlWriteResult(allFiles, res);
+
+    File transfer = allFiles[0];
+    if (!PreferenceManager.getDefaultSharedPreferences(context)
+            .getBoolean(KEY_IFW_ENABLED, true)) {
+      transfer = getXmlEmpty(context);
+      xmlWriteResult(transfer, "<rules>\n</rules>\n");
     }
     Intent i = new Intent("android.intent.action.UPDATE_INTENT_FIREWALL");
     i.putExtra("REQUIRED_HASH", "NONE");
