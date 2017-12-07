@@ -120,4 +120,15 @@
   <string name="ifw_type_broadcast">廣播</string>
   <string name="ifw_type_activity">活動</string>
   <string name="menu_block_type">屏蔽類型: %1$s</string>
+  <string name="install_system_title">安裝為系統程式</string>
+  <string name="install_system_summary">安裝到/移除自系統分割區 (需要 Root 許可權)</string>
+  <string name="install_system_action_install">安裝</string>
+  <string name="install_system_action_uninstall">移除</string>
+  <string name="install_system_install_okay">安裝成功，請重新開機</string>
+  <string name="install_system_uninstall_okay">移除成功，請重新開機</string>
+  <string name="error_remount_system">無法重載系統分割區以寫入</string>
+  <string name="install_system_install_error">安裝失敗: %1$s</string>
+  <string name="install_system_uninstall_error">移除失敗: %1$s</string>
+  <string name="original_author">8enet (原作者)</string>
+  <string name="original_github">原版 Github</string>
 </resources>

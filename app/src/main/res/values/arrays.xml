@@ -2,7 +2,7 @@
 <resources>
   <!-- 致谢名单 -->
   <string-array name="acknowledgments_list">
-    <item>Author: 8enet</item>
+    <item>@string/original_author</item>
     <item>wwsh123</item>
     <item>乱飞的草帽</item>
     <item>whatthefuck</item>
@@ -43,6 +43,10 @@
     <item>service</item>
     <item>broadcast</item>
     <item>activity</item>
+  </string-array>
+  <string-array name="install_system">
+    <item>@string/install_system_action_install</item>
+    <item>@string/install_system_action_uninstall</item>
   </string-array>
 
 </resources>

@@ -120,4 +120,15 @@
   <string name="ifw_type_service">Service</string>
   <string name="ifw_type_broadcast">Broadcast</string>
   <string name="ifw_type_activity">Activity</string>
+  <string name="install_system_title">Install as system app</string>
+  <string name="install_system_summary">Install into or uninstall from the system partition (Root required)</string>
+  <string name="install_system_action_install">Install</string>
+  <string name="install_system_action_uninstall">Uninstall</string>
+  <string name="install_system_install_okay">Installed successfully. Please reboot your device.</string>
+  <string name="install_system_uninstall_okay">Uninstalled successfully. Please reboot your device.</string>
+  <string name="error_remount_system">Cannot make system partition writable</string>
+  <string name="install_system_install_error">Install Error: %1$s</string>
+  <string name="install_system_uninstall_error">Uninstall Error: %1$s</string>
+  <string name="original_author">8enet (original author)</string>
+  <string name="original_github">Github of original version</string>
 </resources>

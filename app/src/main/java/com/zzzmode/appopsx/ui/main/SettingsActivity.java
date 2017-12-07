@@ -122,6 +122,15 @@ public class SettingsActivity extends BaseActivity {
       appLanguage.setSummary(
           getResources().getStringArray(R.array.languages)[LangHelper.getLocalIndex(getContext())]);
 
+      findPreference("pref_install_system").setOnPreferenceClickListener(
+              new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                  showInstallSystemDialog();
+                  return true;
+                }
+              });
+
       findPreference("acknowledgments")
           .setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -350,6 +359,69 @@ public class SettingsActivity extends BaseActivity {
       builder.show();
     }
 
+    private void showInstallSystemDialog() {
+      AlertDialog.Builder builder =
+              new AlertDialog.Builder(getActivity());
+      builder.setTitle(R.string.install_system_title);
+
+      final int[] selected = new int[1];
+      builder.setSingleChoiceItems(R.array.install_system, 0,
+              new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                  selected[0] = which;
+                }
+              });
+
+      builder.setNegativeButton(android.R.string.cancel, null);
+      builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+          dialog.dismiss();
+          Context context = getActivity().getApplicationContext();
+          Helper.systemInstall(context, selected[0] == 0)
+                  .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                  .subscribe(new ResourceObserver<Boolean>() {
+                    @Override
+                    public void onNext(Boolean success) {
+                      String text;
+                      if (success) {
+                        text = getString((selected[0] == 0) ?
+                                R.string.install_system_install_okay :
+                                R.string.install_system_uninstall_okay);
+                      } else {
+                        text = getString((selected[0] == 0) ?
+                                R.string.install_system_action_install :
+                                R.string.install_system_action_uninstall);
+                      }
+                      Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                      Context ctx = getActivity();
+                      String errorMsg = e.getMessage();
+                      String msg = errorMsg;
+                      if (e instanceof RuntimeException) {
+                        if (errorMsg.contains("RootAccess denied")) {
+                          msg = ctx.getString(R.string.error_su_timeout);
+                        }
+                      }
+                      int prompt = (selected[0] == 0) ?
+                              R.string.install_system_install_error :
+                              R.string.install_system_uninstall_error;
+                      Toast.makeText(ctx, ctx.getString(prompt, msg), Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                  });
+        }
+      });
+      builder.show();
+    }
+
 
     private void switchLanguage() {
       LangHelper.updateLanguage(getContext());
@@ -366,7 +438,7 @@ public class SettingsActivity extends BaseActivity {
     private void showVersion() {
       Intent intent = new Intent(Intent.ACTION_VIEW);
       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-      intent.setData(Uri.parse("https://github.com/linusyang92/AppOpsX"));
+      intent.setData(Uri.parse("https://github.com/linusyang92/AppOpsX/releases"));
       startActivity(intent);
     }
 

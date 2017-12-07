@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        travis {
+            keyAlias 'travis'
+            keyPassword 'travis'
+            storeFile file('../travis.keystore')
+            storePassword 'travis'
+        }
+    }
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
@@ -9,7 +17,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
-        signingConfig signingConfigs.debug
+        signingConfig signingConfigs.travis
         resConfigs "en","zh-rCN","zh-rTW"
         vectorDrawables.useSupportLibrary = true
     }

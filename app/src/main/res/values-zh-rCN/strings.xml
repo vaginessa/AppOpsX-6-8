@@ -154,4 +154,15 @@
   <string name="ifw_type_broadcast">广播</string>
   <string name="ifw_type_activity">活动</string>
   <string name="menu_block_type">屏蔽类型: %1$s</string>
+  <string name="install_system_title">安装为系统程序</string>
+  <string name="install_system_summary">安装到/卸载自系统分区 (需要 Root 权限)</string>
+  <string name="install_system_action_install">安装</string>
+  <string name="install_system_action_uninstall">卸载</string>
+  <string name="install_system_install_okay">安装成功，请重启设备</string>
+  <string name="install_system_uninstall_okay">卸载成功，请重启设备</string>
+  <string name="error_remount_system">无法重载系统分区为可写</string>
+  <string name="install_system_install_error">安装失败: %1$s</string>
+  <string name="install_system_uninstall_error">卸载失败: %1$s</string>
+  <string name="original_author">8enet (原作者)</string>
+  <string name="original_github">原版 Github</string>
 </resources>

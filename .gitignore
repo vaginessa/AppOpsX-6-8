@@ -8,7 +8,7 @@
 /captures
 .externalNativeBuild
 /package/system
-/appopsx.zip
+/appopsx*.zip
 /uninstaller.zip
 /checksum*
 

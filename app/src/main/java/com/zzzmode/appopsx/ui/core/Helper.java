@@ -38,6 +38,7 @@ import com.zzzmode.appopsx.common.OpsResult;
 import com.zzzmode.appopsx.common.OtherOp;
 import com.zzzmode.appopsx.common.PackageOps;
 import com.zzzmode.appopsx.common.ReflectUtils;
+import com.zzzmode.appopsx.common.Shell;
 import com.zzzmode.appopsx.ui.analytics.AEvent;
 import com.zzzmode.appopsx.ui.analytics.ATracker;
 import com.zzzmode.appopsx.ui.main.backup.BFileUtils;
@@ -1639,6 +1640,52 @@ public class Helper {
           });
         }
         e.onNext(list);
+        e.onComplete();
+      }
+    });
+  }
+
+  private static final String INSTALL_CMD =
+          "mkdir -p /system/priv-app/AppOpsX && " +
+          "cp %s /system/priv-app/AppOpsX/AppOpsX.apk && " +
+          "chmod 755 /system/priv-app/AppOpsX && " +
+          "chmod 644 /system/priv-app/AppOpsX/AppOpsX.apk && " +
+          "chown -R 0:0 /system/priv-app/AppOpsX && " +
+          "mkdir -p /data/system/ifw && " +
+          "chown system:system /data/system/ifw && " +
+          "chmod 700 /data/system/ifw && " +
+          "rm -rf /data/system/ifw/metadata && " +
+          "touch /data/system/ifw/metadata && " +
+          "chown 0:0 /data/system/ifw/metadata && " +
+          "chmod 600 /data/system/ifw/metadata";
+
+  private static final String UNINSTALL_CMD =
+          "rm -rf /data/system/ifw/metadata && " +
+          "rm -f /data/system/ifw/ifw.xml && " +
+          "rm -rf /system/priv-app/AppOpsX";
+
+  public static Observable<Boolean> systemInstall(final Context context,
+                                                  final boolean isInstall) {
+
+    return Observable.create(new ObservableOnSubscribe<Boolean>() {
+      @Override
+      public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+        Shell shell = Shell.getRootShell();
+        Shell.Result mountResult = shell.exec("mount -o rw,remount /system");
+        if (mountResult.getStatusCode() != 0) {
+          throw new IOException(context.getString(R.string.error_remount_system));
+        } else {
+          PackageManager packageManager = context.getPackageManager();
+          PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+          String appPath = packageInfo.applicationInfo.sourceDir;
+          String execFormat = isInstall ? INSTALL_CMD : UNINSTALL_CMD;
+          Shell.Result installResult = shell.exec(String.format(execFormat, appPath));
+          if (installResult.getStatusCode() == 0) {
+            e.onNext(true);
+          } else {
+            throw new IOException(installResult.getMessage());
+          }
+        }
         e.onComplete();
       }
     });

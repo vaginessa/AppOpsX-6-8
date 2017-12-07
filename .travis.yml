@@ -37,7 +37,7 @@ deploy:
     secure: tLYfi5C0+vqEtT6TDKND0lURagZME2D5YJCxc6ULTMAaXfExP5E3AgIxdQgXRIpJbmCrbp3u8aFKxVHKKD38ayEJt47rHCdFj/P0WUgQLCKWWUkvU18YiFu2SUVu06FtNyCWrPOLj8dv0vBC+8R7b2N0Jyxl0UQt8TmQEJg/ayT4xxNl3MNl2FkKSUJ0HfiTef3dCbTQb+EEcUd8VLGlYPpa3vUDmRy0s93b9EHPsCYt9lwjjVftJ22PVUM1763iRAZ2uAfAJ/V93VfBUaiLWfwUnO90afVvgCBDEuQZ4YiVKlh6ZQhu/RGUNU1IYsyRqlwGKzodQ9YfwcXHVm7rrdsSq2u0aWufZ8kUN+4lCQyaBmlimIVsB3HAPBD9bRhavHroacwaWBk0XdQyqYRS+QcrTqRWK9rYWMG2u7GHcxRx6Tn+5DHahgpgORHNDqmpVCm23FJo7QNuoqvhIAkqRl9/dOIfU4UQw5SOqRu4FoFhvt6QRXol8VHbLI+uBiUKaLvE94cupp3C0g1G5I7RoSV349k1ZS1SnNpAxypUlgktMBt9NsctxPx2eVDjmacv7osOji9KJ0xftVXZFqD/xqcBDLra7jkT/053AS8tcinAPjH/d3XsNo56gF0Jh6ZSmyPRBmfqOCt3HApnWVsoShZKfIdSOAd0emPzHYY9m7k=
   file_glob: true
   file:
-  - appopsx.zip
+  - appopsx-installer.zip
   - uninstaller.zip
   - package/system/priv-app/AppOpsX/AppOpsX.apk
   - checksum.txt
