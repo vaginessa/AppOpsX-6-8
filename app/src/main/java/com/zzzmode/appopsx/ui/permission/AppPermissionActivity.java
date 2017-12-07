@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -54,6 +55,7 @@ public class AppPermissionActivity extends BaseActivity implements IPermView {
   private TextView tvError;
   private PermPresenter mPresenter;
   private AppPermissionAdapter adapter;
+  private SwipeRefreshLayout mSwipeRefreshLayout;
 
   private String pkgName;
 
@@ -82,6 +84,10 @@ public class AppPermissionActivity extends BaseActivity implements IPermView {
     mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
     RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+    mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefreshlayout);
+    mSwipeRefreshLayout.setRefreshing(false);
+    mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
+    mSwipeRefreshLayout.setEnabled(false);
     recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
     recyclerView.addItemDecoration(new CommonDivderDecorator(getApplicationContext()));
 

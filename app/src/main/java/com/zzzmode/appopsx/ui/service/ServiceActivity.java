@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -66,6 +67,7 @@ public class ServiceActivity extends BaseActivity implements
     private ServicePresenter mPresenter;
     private ServiceAdapter adapter;
     private ServiceAdapter activeAdapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private String pkgName;
     private View containerApp, containerSearch;
@@ -104,6 +106,10 @@ public class ServiceActivity extends BaseActivity implements
 
         tvError = (TextView) findViewById(R.id.tv_error);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefreshlayout);
+        mSwipeRefreshLayout.setRefreshing(false);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
+        mSwipeRefreshLayout.setEnabled(true);
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -119,6 +125,13 @@ public class ServiceActivity extends BaseActivity implements
         pkgName = appInfo.packageName;
         mPresenter = new ServicePresenter(this, appInfo, getApplicationContext());
         mPresenter.setUp();
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mPresenter.load();
+            }
+        });
     }
 
     @Override
@@ -373,6 +386,7 @@ public class ServiceActivity extends BaseActivity implements
     @Override
     public void showError(CharSequence text) {
         mProgressBar.setVisibility(View.GONE);
+        mSwipeRefreshLayout.setRefreshing(false);
         tvError.setVisibility(View.VISIBLE);
         tvError.setText(text);
         refreshAdapter(Collections.<ServiceEntryInfo>emptyList());
@@ -381,6 +395,7 @@ public class ServiceActivity extends BaseActivity implements
 
     @Override
     public void showServices(List<ServiceEntryInfo> opEntryInfos) {
+        mSwipeRefreshLayout.setRefreshing(false);
         refreshAdapter(opEntryInfos);
         ActivityCompat.invalidateOptionsMenu(ServiceActivity.this);
     }
