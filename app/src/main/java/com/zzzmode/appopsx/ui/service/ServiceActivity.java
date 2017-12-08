@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import com.zzzmode.appopsx.R;
 import com.zzzmode.appopsx.ui.BaseActivity;
 import com.zzzmode.appopsx.ui.core.Helper;
+import com.zzzmode.appopsx.ui.core.SpHelper;
 import com.zzzmode.appopsx.ui.main.MainActivity;
 import com.zzzmode.appopsx.ui.model.AppInfo;
 import com.zzzmode.appopsx.ui.model.ServiceEntryInfo;
@@ -366,7 +368,9 @@ public class ServiceActivity extends BaseActivity implements
             return;
         }
         adapter.setShowConfig(getConfig(KEY_FULL_NAME, false),
-                getConfig(KEY_IFW_ENABLED, true));
+                getConfig(KEY_IFW_ENABLED, true),
+                SpHelper.getThemeMode(getApplicationContext()) ==
+                        AppCompatDelegate.MODE_NIGHT_YES);
     }
 
     private void refreshAdapter(List<ServiceEntryInfo> infos) {

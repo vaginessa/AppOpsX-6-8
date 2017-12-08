@@ -30,13 +30,16 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
 
   protected boolean showFullName;
   private boolean switchEnabled;
+  private boolean isNightMode;
   private int HIGHLIGHT_COLOR = 0xff1976d2;
   private int DISABLED_COLOR = 0xfff50057;
   private int DEFAULT_COLOR = 0xFF212121;
+  private int DEFAULT_COLOR_NIGHT = 0xf2ffffff;
 
-  void setShowConfig(boolean showFullName, boolean enabled) {
+  void setShowConfig(boolean showFullName, boolean enabled, boolean night) {
     this.showFullName = showFullName;
     this.switchEnabled = enabled;
+    this.isNightMode = night;
   }
 
   void setDatas(List<ServiceEntryInfo> datas) {
@@ -89,7 +92,7 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
     holder.summary.setVisibility(View.GONE);
     holder.lastTime.setVisibility(View.GONE);
     holder.title.setTypeface(null, Typeface.NORMAL);
-    holder.title.setTextColor(DEFAULT_COLOR);
+    holder.title.setTextColor(isNightMode ? DEFAULT_COLOR_NIGHT : DEFAULT_COLOR);
 
     if (opEntryInfo != null) {
       if (opEntryInfo.serviceName != null) {
