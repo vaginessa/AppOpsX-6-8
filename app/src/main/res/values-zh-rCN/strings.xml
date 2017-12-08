@@ -165,4 +165,8 @@
   <string name="install_system_uninstall_error">卸载失败: %1$s</string>
   <string name="original_author">8enet (原作者)</string>
   <string name="original_github">原版 Github</string>
+  <string name="reset_hint_title">重置功能提示</string>
+  <string name="hint_ifw_initial">\u2022 长按应用列表可显示服务\n\u2022 配置自动备份在 /sdcard/Android/ifw_backup.xml\n\u2022 要恢复配置可覆盖文件 /sdcard/Android/data/com.zzzmode.appopsx.sys/files/backup/ifw_backup.xml</string>
+  <string name="hint_ifw_color">\u2022 正在运行的服务标记为<font fgcolor="#ff1976d2">蓝色</font>\n\u2022 已被系统禁用的服务标记为<font fgcolor="#fff50057">红色</font></string>
+  <string name="hint_backup_permission">请允许存储权限以备份设置</string>
 </resources>

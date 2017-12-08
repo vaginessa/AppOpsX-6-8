@@ -1,17 +1,21 @@
 package com.zzzmode.appopsx.ui.main;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -49,9 +53,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends BaseActivity implements SearchView.OnQueryTextListener {
+public class MainActivity extends BaseActivity implements SearchView.OnQueryTextListener,
+  ActivityCompat.OnRequestPermissionsResultCallback {
 
   private static final String TAG = "MainActivity";
+  private static final int REQUEST_BACKUP = 10000;
 
   private MainListAdapter adapter;
 
@@ -63,6 +69,7 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
   private SearchHandler mSearchHandler;
 
   private View containerApp, containerSearch;
+  private boolean hintShowed;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -99,17 +106,54 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
       }
     });
 
+    hintShowed = PreferenceManager.
+            getDefaultSharedPreferences(getApplicationContext()).
+            getBoolean("hint_showed", false);
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
        if (ActivityCompat.checkSelfPermission(this,
               Manifest.permission.WRITE_EXTERNAL_STORAGE)
               != PackageManager.PERMISSION_GRANTED) {
          ActivityCompat.requestPermissions(this,
                  new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                 0);
+                 REQUEST_BACKUP);
+       } else {
+         showHint();
        }
+    } else {
+      showHint();
     }
   }
 
+  private void showHint() {
+    if (!hintShowed) {
+      showHint(this, "hint_showed", R.string.hint_ifw_initial);
+    }
+  }
+
+  public static void showHint(Activity context, final String key, final int hintId) {
+    final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+    AlertDialog.Builder builder =
+            new AlertDialog.Builder(context);
+    builder.setTitle(R.string.help);
+    builder.setMessage(hintId);
+    builder.setPositiveButton(android.R.string.ok, null);
+    builder.show();
+    sp.edit().putBoolean(key, true).apply();
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                         @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    if (requestCode == REQUEST_BACKUP) {
+      if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        showHint();
+      } else {
+        Toast.makeText(getApplicationContext(), R.string.hint_backup_permission, Toast.LENGTH_LONG).show();
+      }
+    }
+  }
 
   private void loadData(final boolean isFirst) {
     boolean showSysApp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())

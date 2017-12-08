@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.zzzmode.appopsx.R;
 import com.zzzmode.appopsx.ui.BaseActivity;
 import com.zzzmode.appopsx.ui.core.Helper;
+import com.zzzmode.appopsx.ui.main.MainActivity;
 import com.zzzmode.appopsx.ui.model.AppInfo;
 import com.zzzmode.appopsx.ui.model.ServiceEntryInfo;
 import com.zzzmode.appopsx.ui.widget.CommonDivderDecorator;
@@ -72,6 +73,7 @@ public class ServiceActivity extends BaseActivity implements
     private String pkgName;
     private View containerApp, containerSearch;
     private SearchHandler mSearchHandler;
+    private boolean hintShowed;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -132,6 +134,10 @@ public class ServiceActivity extends BaseActivity implements
                 mPresenter.load();
             }
         });
+        hintShowed = getConfig("hint_color_showed", false);
+        if (!hintShowed) {
+            MainActivity.showHint(this, "hint_color_showed", R.string.hint_ifw_color);
+        }
     }
 
     @Override

@@ -109,6 +109,18 @@ public class SettingsActivity extends BaseActivity {
                   return true;
                 }
               });
+      Preference resetHint = findPreference("pref_reset_hint");
+      resetHint.setEnabled(true);
+      resetHint.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+          SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+          sp.edit().putBoolean("hint_showed", false).apply();
+          sp.edit().putBoolean("hint_color_showed", false).apply();
+          preference.setEnabled(false);
+          return true;
+        }
+      });
 
       findPreference("project").setOnPreferenceClickListener(this);
       findPreference("translate").setOnPreferenceClickListener(this);

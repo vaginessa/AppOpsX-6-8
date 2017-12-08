@@ -30,8 +30,8 @@ class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> imp
 
   protected boolean showFullName;
   private boolean switchEnabled;
-  private int HIGHLIGHT_COLOR = Color.BLUE;
-  private int DISABLED_COLOR = Color.RED;
+  private int HIGHLIGHT_COLOR = 0xff1976d2;
+  private int DISABLED_COLOR = 0xfff50057;
   private int DEFAULT_COLOR = 0xFF212121;
 
   void setShowConfig(boolean showFullName, boolean enabled) {
