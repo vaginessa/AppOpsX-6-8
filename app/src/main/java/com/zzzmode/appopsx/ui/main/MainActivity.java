@@ -115,7 +115,8 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
               Manifest.permission.WRITE_EXTERNAL_STORAGE)
               != PackageManager.PERMISSION_GRANTED) {
          ActivityCompat.requestPermissions(this,
-                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                         Manifest.permission.READ_EXTERNAL_STORAGE},
                  REQUEST_BACKUP);
        } else {
          showHint();
@@ -125,10 +126,29 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
     }
   }
 
+  private void loadServices() {
+    Helper.syncService(getApplicationContext())
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new ResourceObserver<Boolean>() {
+              @Override
+              public void onNext(Boolean value) {
+              }
+
+              @Override
+              public void onError(Throwable e) {
+              }
+
+              @Override
+              public void onComplete() {
+              }
+            });
+  }
+
   private void showHint() {
     if (!hintShowed) {
       showHint(this, "hint_showed", R.string.hint_ifw_initial);
     }
+    loadServices();
   }
 
   public static void showHint(Activity context, final String key, final int hintId) {
@@ -147,10 +167,11 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
                                          @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     if (requestCode == REQUEST_BACKUP) {
-      if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+      if (grantResults.length > 0 &&
+              grantResults[0] == PackageManager.PERMISSION_GRANTED) {
         showHint();
       } else {
-        Toast.makeText(getApplicationContext(), R.string.hint_backup_permission, Toast.LENGTH_LONG).show();
+        loadServices();
       }
     }
   }
@@ -192,21 +213,6 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
         ActivityCompat.invalidateOptionsMenu(MainActivity.this);
       }
     });
-    Helper.setService(getApplicationContext(), "", null)
-            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new ResourceObserver<Boolean>() {
-              @Override
-              public void onNext(Boolean value) {
-              }
-
-              @Override
-              public void onError(Throwable e) {
-              }
-
-              @Override
-              public void onComplete() {
-              }
-            });
   }
 
   @Override

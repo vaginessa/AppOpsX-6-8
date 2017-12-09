@@ -1345,9 +1345,9 @@ public class Helper {
     return new File(transferPath, xmlInternalEmpty);
   }
 
-  private static File getXmlPersistent() {
+  private static File getXmlPersistent(boolean mkDir) {
     File persistentDir = new File(Environment.getExternalStorageDirectory(), xmlPersistent[0]);
-    if (!persistentDir.exists()) {
+    if (mkDir && !persistentDir.exists()) {
       persistentDir.mkdir();
     }
     return new File(persistentDir, xmlPersistent[1]);
@@ -1367,12 +1367,17 @@ public class Helper {
       }
       xmlInited = true;
     }
+    File persistentFile = getXmlPersistent(false);
     File backupFile = getXmlBackup(context);
     File file = getXmlInternal(context);
     if (backupFile.exists() && backupFile.canRead()) {
       file = backupFile;
     } else if (!file.exists()) {
-      return;
+      if (persistentFile.exists() && persistentFile.canRead()) {
+        file = persistentFile;
+      } else {
+        return;
+      }
     }
     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
       String line;
@@ -1479,11 +1484,13 @@ public class Helper {
     }
     result.append("</rules>\n");
     String res = result.toString();
-    File[] allFiles = {getXmlInternal(context), getXmlBackup(context), getXmlPersistent()};
-    xmlWriteResult(allFiles, res);
+    File[] allFiles = {getXmlInternal(context), getXmlBackup(context), getXmlPersistent(true)};
+    if (xmlDict.size() > 0) {
+      xmlWriteResult(allFiles, res);
+    }
 
     File transfer = allFiles[0];
-    if (!PreferenceManager.getDefaultSharedPreferences(context)
+    if (xmlDict.size() == 0 || !PreferenceManager.getDefaultSharedPreferences(context)
             .getBoolean(KEY_IFW_ENABLED, true)) {
       transfer = getXmlEmpty(context);
       xmlWriteResult(transfer, "<rules>\n</rules>\n");
@@ -1567,6 +1574,18 @@ public class Helper {
           infos.add(opEntryInfo);
         }
         updateService(context, pkgName, infos);
+        e.onNext(true);
+        e.onComplete();
+      }
+    });
+  }
+
+  public static Observable<Boolean> syncService(final Context context) {
+
+    return Observable.create(new ObservableOnSubscribe<Boolean>() {
+      @Override
+      public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+        updateService(context, "", Collections.<ServiceEntryInfo>emptyList());
         e.onNext(true);
         e.onComplete();
       }

@@ -134,5 +134,5 @@
   <string name="reset_hint_title">Reset tips</string>
   <string name="hint_backup_permission">Please allow storage permission to backup settings</string>
   <string name="hint_ifw_initial">\u2022 Long press app to show services.\n\u2022 Settings are saved at \"/sdcard/Android/ifw_backup.xml\".\n\u2022 To restore settings, overwrite \"/sdcard/Android/data/com.zzzmode.appopsx.sys/files/backup/ifw_backup.xml\".</string>
-  <string name="hint_ifw_color">\u2022 Running services are marked in <font fgcolor="#ff1976d2">blue</font>.\n\u2022 Services already disabled by system are marked in <font fgcolor="#fff50057">red</font>.</string>
+  <string name="hint_ifw_color">\u2022 Running services are marked in <font fgcolor="#ff1976d2">blue</font> (not for Android 8 or above).\n\u2022 Services already disabled by system are marked in <font fgcolor="#fff50057">red</font>.</string>
 </resources>

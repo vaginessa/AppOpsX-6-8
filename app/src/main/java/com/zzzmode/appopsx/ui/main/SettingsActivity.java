@@ -91,7 +91,7 @@ public class SettingsActivity extends BaseActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                   Context context = getActivity().getApplicationContext();
-                  Helper.setService(context, "", null)
+                  Helper.syncService(context)
                           .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                           .subscribe(new ResourceObserver<Boolean>() {
                             @Override

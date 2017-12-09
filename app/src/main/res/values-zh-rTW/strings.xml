@@ -133,6 +133,6 @@
   <string name="original_github">原版 Github</string>
   <string name="reset_hint_title">重置功能提示</string>
   <string name="hint_ifw_initial">\u2022 長按程式列表可顯示服務\n\u2022 配置自動存儲在 /sdcard/Android/ifw_backup.xml\n\u2022 要恢復配置可覆蓋檔案 /sdcard/Android/data/com.zzzmode.appopsx.sys/files/backup/ifw_backup.xml</string>
-  <string name="hint_ifw_color">\u2022 正在運行的服務顯示為<font fgcolor="#ff1976d2">藍色</font>\n\u2022 已被系統禁用的服務顯示為<font fgcolor="#fff50057">紅色</font></string>
+  <string name="hint_ifw_color">\u2022 正在運行的服務顯示為<font fgcolor="#ff1976d2">藍色</font> (不支援 Android 8 及以上版本)\n\u2022 已被系統禁用的服務顯示為<font fgcolor="#fff50057">紅色</font></string>
   <string name="hint_backup_permission">請授予許可權以備份配置</string>
 </resources>
