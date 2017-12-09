@@ -55,10 +55,14 @@ import com.zzzmode.appopsx.ui.permission.AppPermissionActivity;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1357,15 +1361,18 @@ public class Helper {
     return new File(BFileUtils.getBackupDir(context), xmlBackupName);
   }
 
+  private static void importXml(Context context, InputStream inStream) throws IOException {
+    synchronized (initLock) {
+      xmlInited = false;
+      xmlDict.clear();
+    }
+    xmlDictInit(inStream);
+    updateService(context, "", null);
+  }
+
   private static void xmlDictInit(final Context context) throws IOException {
     if (xmlInited) {
       return;
-    }
-    synchronized (initLock) {
-      if (xmlInited) {
-        return;
-      }
-      xmlInited = true;
     }
     File persistentFile = getXmlPersistent(false);
     File backupFile = getXmlBackup(context);
@@ -1379,7 +1386,20 @@ public class Helper {
         return;
       }
     }
-    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+    xmlDictInit(new FileInputStream(file));
+  }
+
+  private static void xmlDictInit(final InputStream stream) throws IOException {
+    if (xmlInited) {
+      return;
+    }
+    synchronized (initLock) {
+      if (xmlInited) {
+        return;
+      }
+      xmlInited = true;
+    }
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
       String line;
       String name = "";
       Map<String, Set<String>> outList = new LinkedHashMap<>();
@@ -1439,6 +1459,27 @@ public class Helper {
     return result;
   }
 
+  private static String generateXml() {
+    StringBuilder result = new StringBuilder();
+    result.append("<rules>\n");
+    for (Map.Entry<String, Map<String, Set<String>>> entry: xmlDict.entrySet()) {
+      String label = entry.getKey();
+      result.append("<" + label + " block=\"true\" log=\"false\">\n");
+      Map<String, Set<String>> allServices = entry.getValue();
+      for (Map.Entry<String, Set<String>> sEntry: allServices.entrySet()) {
+        String pack = sEntry.getKey();
+        Set<String> set = sEntry.getValue();
+        String[] services = set.toArray(new String[set.size()]);
+        for (String service: services) {
+          result.append("<component-filter name=\"" + pack + "/" + service + "\" />\n");
+        }
+      }
+      result.append("</" + label + ">\n");
+    }
+    result.append("</rules>\n");
+    return result.toString();
+  }
+
   private static synchronized void updateService(final Context context, final String packageName,
                                                  List<ServiceEntryInfo> infos) {
     try {
@@ -1466,29 +1507,10 @@ public class Helper {
         }
       }
     }
-    StringBuilder result = new StringBuilder();
-    result.append("<rules>\n");
-    for (Map.Entry<String, Map<String, Set<String>>> entry: xmlDict.entrySet()) {
-      String label = entry.getKey();
-      result.append("<" + label + " block=\"true\" log=\"false\">\n");
-      Map<String, Set<String>> allServices = entry.getValue();
-      for (Map.Entry<String, Set<String>> sEntry: allServices.entrySet()) {
-        String pack = sEntry.getKey();
-        Set<String> set = sEntry.getValue();
-        String[] services = set.toArray(new String[set.size()]);
-        for (String service: services) {
-          result.append("<component-filter name=\"" + pack + "/" + service + "\" />\n");
-        }
-      }
-      result.append("</" + label + ">\n");
-    }
-    result.append("</rules>\n");
-    String res = result.toString();
     File[] allFiles = {getXmlInternal(context), getXmlBackup(context), getXmlPersistent(true)};
     if (xmlDict.size() > 0) {
-      xmlWriteResult(allFiles, res);
+      xmlWriteResult(allFiles, generateXml());
     }
-
     File transfer = allFiles[0];
     if (xmlDict.size() == 0 || !PreferenceManager.getDefaultSharedPreferences(context)
             .getBoolean(KEY_IFW_ENABLED, true)) {
@@ -1585,7 +1607,38 @@ public class Helper {
     return Observable.create(new ObservableOnSubscribe<Boolean>() {
       @Override
       public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
-        updateService(context, "", Collections.<ServiceEntryInfo>emptyList());
+        updateService(context, "", null);
+        e.onNext(true);
+        e.onComplete();
+      }
+    });
+  }
+
+  public static Observable<Boolean> importService(final Context context, final Uri uri) {
+
+    return Observable.create(new ObservableOnSubscribe<Boolean>() {
+      @Override
+      public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+        importXml(context, context.getContentResolver().openInputStream(uri));
+        e.onNext(true);
+        e.onComplete();
+      }
+    });
+  }
+
+  public static Observable<Boolean> exportService(final Context context, final Uri uri) {
+
+    return Observable.create(new ObservableOnSubscribe<Boolean>() {
+      @Override
+      public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+        try {
+          xmlDictInit(context);
+        } catch (IOException ex) {}
+        try (OutputStream stream = context.getContentResolver().openOutputStream(uri)) {
+          if (stream != null) {
+            stream.write(generateXml().getBytes(Charset.forName("UTF-8")));
+          }
+        }
         e.onNext(true);
         e.onComplete();
       }

@@ -20,6 +20,7 @@ import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 import android.view.MenuItem;
 import android.widget.Toast;
+
 import com.zzzmode.appopsx.BuildConfig;
 import com.zzzmode.appopsx.R;
 import com.zzzmode.appopsx.ui.BaseActivity;
@@ -30,22 +31,28 @@ import com.zzzmode.appopsx.ui.core.Helper;
 import com.zzzmode.appopsx.ui.core.LangHelper;
 import com.zzzmode.appopsx.ui.model.OpEntryInfo;
 import com.zzzmode.appopsx.ui.widget.NumberPickerPreference;
-import io.reactivex.SingleEmitter;
+
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import io.reactivex.Observable;
 import io.reactivex.SingleObserver;
-import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.internal.operators.single.SingleJust;
 import io.reactivex.observers.ResourceObserver;
 import io.reactivex.schedulers.Schedulers;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by zl on 2017/1/16.
  */
 
 public class SettingsActivity extends BaseActivity {
+
+  public static final int REQUEST_CODE_IMPORT_IFW = 1;
+  public static final int REQUEST_CODE_EXPORT_IFW = 2;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,6 +81,50 @@ public class SettingsActivity extends BaseActivity {
     AppOpsx.updateConfig(getApplicationContext());
   }
 
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (resultCode == Activity.RESULT_OK) {
+      final Uri uri = data.getData();
+      if (uri == null) {
+        return;
+      }
+      final Context context = getApplicationContext();
+      Observable<Boolean> observer = null;
+      final String[] hint = new String[]{""};
+      if (requestCode == REQUEST_CODE_IMPORT_IFW) {
+        observer = Helper.importService(context, uri);
+        hint[0] = getString(R.string.perm_import);
+      } else if (requestCode == REQUEST_CODE_EXPORT_IFW) {
+        observer = Helper.exportService(context, uri);
+        hint[0] = getString(R.string.perm_export);
+      }
+      if (observer != null) {
+        observer.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new ResourceObserver<Boolean>() {
+                  @Override
+                  public void onNext(Boolean value) {
+                    if (value && hint[0] != null && hint[0].length() > 0) {
+                      Toast.makeText(getApplicationContext(),
+                              getString(R.string.import_toast, hint[0]),
+                              Toast.LENGTH_LONG).show();
+                    }
+                  }
+
+                  @Override
+                  public void onError(Throwable e) {
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.toast_error) + ": " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                  }
+
+                  @Override
+                  public void onComplete() {
+                  }
+                });
+      }
+    }
+  }
 
   public static class MyPreferenceFragment extends PreferenceFragmentCompat implements
       Preference.OnPreferenceClickListener {
@@ -118,6 +169,30 @@ public class SettingsActivity extends BaseActivity {
           sp.edit().putBoolean("hint_showed", false).apply();
           sp.edit().putBoolean("hint_color_showed", false).apply();
           preference.setEnabled(false);
+          return true;
+        }
+      });
+      findPreference("pref_import_ifw").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+          Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+          intent.addCategory(Intent.CATEGORY_OPENABLE);
+          intent.setType("*/*");
+          getActivity().startActivityForResult(intent, REQUEST_CODE_IMPORT_IFW);
+          return true;
+        }
+      });
+      findPreference("pref_export_ifw").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+          Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+          intent.addCategory(Intent.CATEGORY_OPENABLE);
+          intent.setType("text/xml");
+          SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US);
+          Date now = new Date();
+          String fileName = "ifw-" + formatter.format(now) + ".xml";
+          intent.putExtra(Intent.EXTRA_TITLE, fileName);
+          getActivity().startActivityForResult(intent, REQUEST_CODE_EXPORT_IFW);
           return true;
         }
       });

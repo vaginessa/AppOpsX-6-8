@@ -150,7 +150,7 @@
   <string name="ifw_disable_title">禁用服务</string>
   <string name="ifw_disable_summary">使用 ifw.xml (Intent 防火墙) 禁用服务和广播，长按应用列表以显示服务列表。</string>
   <string name="ifw_disabled_hint">禁用服务功能已关闭，请在设置中开启。</string>
-    <string name="ifw_type_service">服务</string>
+  <string name="ifw_type_service">服务</string>
   <string name="ifw_type_broadcast">广播</string>
   <string name="ifw_type_activity">活动</string>
   <string name="menu_block_type">屏蔽类型: %1$s</string>
@@ -169,4 +169,7 @@
   <string name="hint_ifw_initial">\u2022 长按应用列表可显示服务\n\u2022 配置自动备份在 /sdcard/Android/ifw_backup.xml\n\u2022 要恢复配置可覆盖文件 /sdcard/Android/data/com.zzzmode.appopsx.sys/files/backup/ifw_backup.xml</string>
   <string name="hint_ifw_color">\u2022 正在运行的服务标记为<font fgcolor="#ff1976d2">蓝色</font> (不支持 Android 8 及以上版本)\n\u2022 已被系统禁用的服务标记为<font fgcolor="#fff50057">红色</font></string>
   <string name="hint_backup_permission">请允许存储权限以备份设置</string>
+  <string name="export_ifw_title">导出 IFW 配置</string>
+  <string name="import_ifw_title">导入 IFW 配置</string>
+  <string name="import_toast">%1$s成功</string>
 </resources>
