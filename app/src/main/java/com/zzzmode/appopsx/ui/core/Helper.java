@@ -67,6 +67,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -1441,22 +1443,17 @@ public class Helper {
     xmlWriteResult(new File[]{file}, result);
   }
 
-  private static Map<String, Boolean> getServiceDisabledMap(final Context context,
-                                                            final String packageName,
-                                                            final String tag) throws IOException {
+  private static Set<String> getServiceDisabledMap(final Context context,
+                                                   final String packageName,
+                                                   final String tag) throws IOException {
     xmlDictInit(context);
-    Map<String, Boolean> result = new HashMap<>();
     if (xmlDict.containsKey(tag)) {
       Map<String, Set<String>> allServices = xmlDict.get(tag);
       if (allServices.containsKey(packageName)) {
-        Set<String> serviceSet = allServices.get(packageName);
-        String[] disabledServices = serviceSet.toArray(new String[serviceSet.size()]);
-        for (String service: disabledServices) {
-          result.put(service, false);
-        }
+        return allServices.get(packageName);
       }
     }
-    return result;
+    return Collections.emptySet();
   }
 
   private static String generateXml() {
@@ -1694,7 +1691,8 @@ public class Helper {
 
         List<ServiceEntryInfo> list = new ArrayList<>();
         if (services != null) {
-          Map<String, Boolean> disabledMap = getServiceDisabledMap(context, packageName, myTag);
+          Set<String> disabledMap = getServiceDisabledMap(context, packageName, myTag);
+          Set<String> currentServices = new HashSet<>();
           Map<String, ServiceEntryInfo.RunningStatus> runningMap = Collections.emptyMap();
           if (isService) {
             runningMap = getRunningServiceMap(context);
@@ -1721,8 +1719,16 @@ public class Helper {
               status = getOrDefault(runningMap,
                       s.packageName + "/" + s.name, status);
             }
+            currentServices.add(s.name);
             list.add(new ServiceEntryInfo(packageName, s.name,
-                    getOrDefault(disabledMap, s.name, true), myTag, status));
+                    !disabledMap.contains(s.name), myTag, status));
+          }
+          Iterator<String> it = disabledMap.iterator();
+          while (it.hasNext()) {
+            String s = it.next();
+            if (!currentServices.contains(s)) {
+              it.remove();
+            }
           }
           Collections.sort(list, new Comparator<ServiceEntryInfo>() {
             private String getShort(String s) {
