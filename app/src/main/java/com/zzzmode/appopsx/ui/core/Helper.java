@@ -33,6 +33,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.zzzmode.appopsx.BuildConfig;
+import com.zzzmode.appopsx.OpsxManager;
 import com.zzzmode.appopsx.R;
 import com.zzzmode.appopsx.common.OpEntry;
 import com.zzzmode.appopsx.common.OpsResult;
@@ -1324,11 +1325,13 @@ public class Helper {
   // IFW xml support
 
   private static final Map<String, Map<String, Set<String>>> xmlDict = new LinkedHashMap<>();
+  private static final Set<String> noBackSet = new LinkedHashSet<>();
   private static final String xmlBackupName = "ifw_backup.xml";
   private static final String[] xmlPersistent = {"Android", "ifw_backup.xml"};
   private static final String[] xmlInternal = {"ifw", "ifw.xml"};
   private static final String xmlInternalEmpty = "ifw_empty.xml";
   private static final Object initLock = new Object();
+  private static final Object backSetLock = new Object();
   private static boolean xmlInited = false;
 
   private static <K, V> V getOrDefault(Map<K,V> map, K key, V defaultValue) {
@@ -1427,6 +1430,12 @@ public class Helper {
             outList.put(ident[0], services);
           }
         }
+        final Pattern noBackLine = Pattern.compile("<!-- RUN_IN_BACKGROUND: (.+) -->");
+        m = noBackLine.matcher(trimedLine);
+        if (m.matches()) {
+          String ident = m.group(1);
+          noBackSet.add(ident.trim());
+        }
       }
     }
   }
@@ -1474,11 +1483,41 @@ public class Helper {
       result.append("</" + label + ">\n");
     }
     result.append("</rules>\n");
+    String[] noBackList = noBackSet.toArray(new String[noBackSet.size()]);
+    for (String pkg: noBackList) {
+      result.append("<!-- RUN_IN_BACKGROUND: " + pkg + " -->\n");
+    }
     return result.toString();
+  }
+
+  public static Observable<Boolean> setNoBack(final Context context, final String pkgName,
+                                              final boolean isNoBack) {
+
+    return Observable.create(new ObservableOnSubscribe<Boolean>() {
+      @Override
+      public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+        xmlDictInit(context);
+        synchronized (backSetLock) {
+          if (isNoBack) {
+            noBackSet.add(pkgName);
+          } else {
+            noBackSet.remove(pkgName);
+          }
+        }
+        updateService(context, pkgName, null, false);
+        e.onNext(true);
+        e.onComplete();
+      }
+    });
   }
 
   private static synchronized void updateService(final Context context, final String packageName,
                                                  List<ServiceEntryInfo> infos) {
+    updateService(context, packageName, infos, true);
+  }
+
+  private static synchronized void updateService(final Context context, final String packageName,
+                                                 List<ServiceEntryInfo> infos, final boolean broadcast) {
     try {
       xmlDictInit(context);
     } catch (IOException e) {}
@@ -1507,6 +1546,9 @@ public class Helper {
     File[] allFiles = {getXmlInternal(context), getXmlBackup(context), getXmlPersistent(true)};
     if (xmlDict.size() > 0) {
       xmlWriteResult(allFiles, generateXml());
+    }
+    if (!broadcast) {
+      return;
     }
     File transfer = allFiles[0];
     if (xmlDict.size() == 0 || !PreferenceManager.getDefaultSharedPreferences(context)
@@ -1599,12 +1641,36 @@ public class Helper {
     });
   }
 
+  private static void syncNoBackReal(final Context context) throws Exception {
+    String[] noBackList = noBackSet.toArray(new String[noBackSet.size()]);
+    for (String pkg: noBackList) {
+      AppOpsx.getInstance(context).setOpsMode(pkg,
+              OpsxManager.OP_RUN_IN_BACKGROUND, AppOpsManager.MODE_IGNORED, true);
+    }
+  }
+
+  public static Observable<Boolean> syncNoBack(final Context context) {
+
+    return Observable.create(new ObservableOnSubscribe<Boolean>() {
+      @Override
+      public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+        try {
+          xmlDictInit(context);
+        } catch (IOException e1) {}
+        syncNoBackReal(context);
+        e.onNext(true);
+        e.onComplete();
+      }
+    });
+  }
+
   public static Observable<Boolean> syncService(final Context context) {
 
     return Observable.create(new ObservableOnSubscribe<Boolean>() {
       @Override
       public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
         updateService(context, "", null);
+        syncNoBackReal(context);
         e.onNext(true);
         e.onComplete();
       }
