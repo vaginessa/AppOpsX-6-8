@@ -1600,16 +1600,6 @@ public class Helper {
   private static List<ActivityManager.RunningServiceInfo> getServicesOreo(ActivityManager manager) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       try {
-        /* On Android 8.0 or above, we need permission INTERACT_ACROSS_USERS_FULL to get
-         * the information of all running services:
-         *
-         *     https://github.com/aosp-mirror/platform_frameworks_base/commit/290e57886db79fb83df61ce00636609b6c03c67f
-         *
-         * However, this permission is limited to "signature" or "installer" level, which is
-         * nearly impossible to get in normal apps:
-         *
-         *     https://github.com/aosp-mirror/platform_frameworks_base/blob/oreo-release/core/res/AndroidManifest.xml#L1768
-         */
         Class<ActivityManager> c = ActivityManager.class;
         Method method = c.getMethod("getService");
         method.setAccessible(true);
