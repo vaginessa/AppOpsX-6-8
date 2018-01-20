@@ -1,46 +1,36 @@
-## AppOpsX
-[![Build Status](https://travis-ci.org/linusyang92/AppOpsX.svg)][ci]
-[![Release Version](https://img.shields.io/github/release/8enet/AppOpsX.svg)][releases]
-[![Issues](https://img.shields.io/github/issues/8enet/AppOpsX.svg)][issues]
-[![Software License](https://img.shields.io/github/license/8enet/AppOpsX.svg)][license]
-[![Crowdin](https://d322cqt584bo4o.cloudfront.net/appopsx/localized.svg)][crowdin]
-[![coolapk](https://img.shields.io/badge/coolapk-download-blue.svg)][coolapk]
+AppOpsX with IFW support
+---------
 
-AppOpsX is a front-end application for the Android AppOpsService. It allows you to restrict app permissions.
+### What is AppOpsX?
 
-[简体中文](README.zh.md)
+AppOpsX is an Android app for individually managing permissions, which can overwrite permission settings of the system. For example, you can disable an *EVIL* app that sniffs your IMEI information by disabling its Phone permission in AppOpsX, even if you allowed Phone permission in the system Settings app. This is quite useful when such *EVIL* apps refuse to work without permissions.
 
-<a href='https://play.google.com/store/apps/details?id=com.zzzmode.appopsx'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' width='150'/></a>
+For more details, please visit the introduction of the [original project](https://github.com/8enet/AppOpsX).
 
-## Features
-* Search Applications
-* Group apps by permissions
-* Import/Export backup file
-* Automatically turn off permissions
-* Multi-user support
-* Supports 4.4+
-* And more...
+### Features of this modified version:
 
+1. No need of adb or root when running (but needs root or 3rd-party recovery for installation).
+2. Support disabling services, broadcasts and activities using Intent Firewall (through `/data/system/ifw/ifw.xml`, **require Android 6.0 and above**).
 
+### Downloads:
 
-## Reporting Bugs
-Bug reports and feature requests can be made via the [public issue tracker][issues].
+Visit the [release](https://github.com/linusyang92/AppOpsX/releases) page.
 
-## Contributing
-Please fork this repository and contribute back using [pull requests][pr].
+### How to install: 
 
-All contributions, large or small, major features, bug fixes, additional language translations, unit/integration tests are welcomed.
+* For **first installation**: 
+    * Use 3rd party recovery: Download and flash the installer zip (`appopsx-installer.zip`) by 3rd party recovery (e.g. TWRP).
+    * Use root permission: Download and install the apk file. Open the app and tap the "setting" icon on the right top corner. Tap "Install as system app" option in "Others" section. Select "Install", confirm and reboot your device.
+* For **future updates**: Just install the apk file normally like any other apps. You can also flash the installer to update.
 
-## Translating
-See the [translation page][crowdin] if you would like to contribute.
+### How to uninstall: 
+* Use 3rd party recovery: Download and flash the `uninstaller.zip` in recovery.
+* Use root permission: Tap "Install as system app" option, select "Uninstall" and confirm. Reboot your device and uninstall the app normally.
 
-## License
-AppOpsX is released under the [MIT License][license].
+### How to backup or restore settings of Intent Firewall: 
+You can use import/export IFW options in settings page of the app.
 
-[pr]: https://github.com/8enet/AppOpsX/pulls
-[issues]: https://github.com/8enet/AppOpsX/issues
-[crowdin]: https://crowdin.com/project/appopsx
-[license]: https://github.com/8enet/AppOpsX/blob/master/LICENSE
-[ci]: https://travis-ci.org/8enet/AppOpsX
-[releases]: https://github.com/8enet/AppOpsX/releases
-[coolapk]: http://www.coolapk.com/apk/com.zzzmode.appopsx
+*Caveat: The backup for IFW settings is automatically saved at `/sdcard/Android/data/com.zzzmode.appopsx.sys/files/backup/ifw_backup.xml`. But this backup file will be removed if you uninstall the app or clear its data. If you allow storage permission, another backup will be automatically saved at `/sdcard/Android/ifw_backup.xml`.*
+
+### License
+Same as the original project.
