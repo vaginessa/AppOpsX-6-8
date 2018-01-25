@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 
 cd package
 TARGET=../appopsx-installer.zip
-APK=../app/build/outputs/apk/app-release.apk
+APK=../app/build/outputs/apk/release/app-release.apk
 DEST=system/priv-app/AppOpsX/AppOpsX.apk
 
 rm -rf system
