@@ -17,6 +17,7 @@ public class AppInfo implements Parcelable {
   public long updateTime;
   public String pinyin;
   public ApplicationInfo applicationInfo;
+  public boolean hasRunningServices;
 
   @Override
   public boolean equals(Object o) {
@@ -46,6 +47,7 @@ public class AppInfo implements Parcelable {
   }
 
   public AppInfo() {
+    this.hasRunningServices = false;
   }
 
   protected AppInfo(Parcel in) {

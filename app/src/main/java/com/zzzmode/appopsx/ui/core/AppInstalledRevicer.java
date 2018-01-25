@@ -41,7 +41,7 @@ public class AppInstalledRevicer extends BroadcastReceiver {
     }
     SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
     Helper.updataShortcuts(context.getApplicationContext());
-    if (sp.getBoolean("ignore_premission", true)) {
+    if (sp.getBoolean("ignore_premission", false)) {
       try {
         String pkgName = intent.getData().getEncodedSchemeSpecificPart();
         if (sp.getBoolean("show_ignore_dialog", false)) {

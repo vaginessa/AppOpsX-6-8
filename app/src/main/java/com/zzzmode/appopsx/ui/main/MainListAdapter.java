@@ -1,6 +1,9 @@
 package com.zzzmode.appopsx.ui.main;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +26,7 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
     View.OnClickListener, View.OnLongClickListener {
 
   protected List<AppInfo> appInfos = new ArrayList<>();
+  private int HIGHLIGHT_COLOR = 0xff1976d2;
 
   void addItem(AppInfo info) {
     appInfos.add(info);
@@ -53,6 +57,10 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
     holder.bindData(appInfo);
 
     holder.tvName.setText(processText(appInfo.appName));
+    if (appInfo.hasRunningServices) {
+      holder.tvName.setTextColor(HIGHLIGHT_COLOR);
+      holder.tvName.setTypeface(null, Typeface.BOLD);
+    }
     holder.itemView.setTag(appInfo);
     holder.itemView.setOnClickListener(this);
     holder.itemView.setOnLongClickListener(this);
@@ -60,6 +68,23 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
 
   protected CharSequence processText(String name) {
     return name;
+  }
+
+  private Intent getNextIntent(View v, boolean ifw) {
+    Intent intent;
+    if (ifw) {
+      intent = new Intent(v.getContext(), ServiceActivity.class);
+      intent.putExtra(ServiceActivity.EXTRA_APP, ((AppInfo) v.getTag()));
+    } else {
+      intent = new Intent(v.getContext(), AppPermissionActivity.class);
+      intent.putExtra(AppPermissionActivity.EXTRA_APP, ((AppInfo) v.getTag()));
+    }
+    return intent;
+  }
+
+  private boolean ifwUseShortClick(Context context) {
+    return PreferenceManager.getDefaultSharedPreferences(context)
+            .getBoolean("ifw_short_click", false);
   }
 
   @Override
@@ -70,11 +95,9 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
   @Override
   public void onClick(View v) {
     if (v.getTag() instanceof AppInfo) {
-
-      Intent intent = new Intent(v.getContext(), AppPermissionActivity.class);
-      intent.putExtra(AppPermissionActivity.EXTRA_APP, ((AppInfo) v.getTag()));
+      boolean ifwShortClick = ifwUseShortClick(v.getContext().getApplicationContext());
+      Intent intent = getNextIntent(v, ifwShortClick);
       v.getContext().startActivity(intent);
-      ATracker.send(getAEventId());
     }
   }
 
@@ -86,8 +109,8 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
   @Override
   public boolean onLongClick(View v) {
     if (v.getTag() instanceof AppInfo) {
-      Intent intent = new Intent(v.getContext(), ServiceActivity.class);
-      intent.putExtra(ServiceActivity.EXTRA_APP, ((AppInfo) v.getTag()));
+      boolean ifwShortClick = ifwUseShortClick(v.getContext().getApplicationContext());
+      Intent intent = getNextIntent(v, !ifwShortClick);
       v.getContext().startActivity(intent);
     }
     return true;

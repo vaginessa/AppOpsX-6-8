@@ -474,6 +474,12 @@ public class Helper {
 
         List<AppInfo> zhAppInfos = new ArrayList<AppInfo>();
         List<AppInfo> enAppInfos = new ArrayList<AppInfo>();
+        List<AppInfo> runningAppInfos = new ArrayList<AppInfo>();
+        Set<String> runningApps = Collections.emptySet();
+        if (PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean("show_running", false)) {
+          runningApps = getRunningApps(context);
+        }
         for (PackageInfo installedPackage : installedPackages) {
           if (loadSysapp
               || (installedPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
@@ -486,6 +492,7 @@ public class Helper {
             info.installTime = installedPackage.firstInstallTime;
             info.updateTime = installedPackage.lastUpdateTime;
             info.applicationInfo = installedPackage.applicationInfo;
+            info.hasRunningServices = runningApps.contains(info.packageName);
 
             LocalImageLoader.initAdd(context, info);
 
@@ -494,7 +501,9 @@ public class Helper {
               info.appName = info.packageName;
             }
             final char c = info.appName.charAt(0);
-            if (c >= 48 && c <= 122) {
+            if (info.hasRunningServices) {
+              runningAppInfos.add(info);
+            } else if (c >= 48 && c <= 122) {
               enAppInfos.add(info);
             } else {
               zhAppInfos.add(info);
@@ -502,6 +511,27 @@ public class Helper {
 
           }
         }
+
+        final int type = PreferenceManager.getDefaultSharedPreferences(context)
+                .getInt("pref_app_sort_type", 0);
+
+        Collections.sort(runningAppInfos, new Comparator<AppInfo>() {
+          @Override
+          public int compare(AppInfo o1, AppInfo o2) {
+            final char c1 = o1.appName.charAt(0);
+            final char c2 = o2.appName.charAt(0);
+            final boolean en1 = (c1 >= 48 && c1 <= 122);
+            final boolean en2 = (c2 >= 48 && c2 <= 122);
+            final int ret = (type == 1) ? 1 : -1;
+            if (en1 && !en2) {
+              return ret;
+            }
+            if (!en1 && en2) {
+              return -ret;
+            }
+            return o1.appName.compareToIgnoreCase(o2.appName);
+          }
+        });
 
         Collections.sort(enAppInfos, new Comparator<AppInfo>() {
           @Override
@@ -518,15 +548,14 @@ public class Helper {
         });
         List<AppInfo> ret = new ArrayList<AppInfo>();
 
-        int type = PreferenceManager.getDefaultSharedPreferences(context)
-            .getInt("pref_app_sort_type", 0);
         if (type == 1) {
           //按名称排序[字母在后]
-
+          ret.addAll(runningAppInfos);
           ret.addAll(zhAppInfos);
           ret.addAll(enAppInfos);
         } else {
           //按名称排序[字母在前] 默认
+          ret.addAll(runningAppInfos);
           ret.addAll(enAppInfos);
           ret.addAll(zhAppInfos);
         }
@@ -1199,6 +1228,12 @@ public class Helper {
           comparator = new Comparator<AppInfo>() {
             @Override
             public int compare(AppInfo o1, AppInfo o2) {
+              if (o1.hasRunningServices && !o2.hasRunningServices) {
+                return -1;
+              }
+              if (!o1.hasRunningServices && o2.hasRunningServices) {
+                return 1;
+              }
               return Long.compare(o2.installTime, o1.installTime);
             }
           };
@@ -1207,6 +1242,12 @@ public class Helper {
           comparator = new Comparator<AppInfo>() {
             @Override
             public int compare(AppInfo o1, AppInfo o2) {
+              if (o1.hasRunningServices && !o2.hasRunningServices) {
+                return -1;
+              }
+              if (!o1.hasRunningServices && o2.hasRunningServices) {
+                return 1;
+              }
               return Long.compare(Math.max(o2.installTime, o2.updateTime),
                   Math.max(o1.installTime, o1.updateTime));
             }
@@ -1552,7 +1593,7 @@ public class Helper {
     }
     File transfer = allFiles[0];
     if (xmlDict.size() == 0 || !PreferenceManager.getDefaultSharedPreferences(context)
-            .getBoolean(KEY_IFW_ENABLED, true)) {
+            .getBoolean(KEY_IFW_ENABLED, false)) {
       transfer = getXmlEmpty(context);
       xmlWriteResult(transfer, "<rules>\n</rules>\n");
     }
@@ -1567,6 +1608,30 @@ public class Helper {
       i.setComponent(cn);
     }
     context.sendBroadcast(i);
+  }
+
+  public static Set<String> getRunningApps(Context context) {
+    Set<String> result = new HashSet<>();
+    ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+    for (ActivityManager.RunningServiceInfo service : getServices(manager)) {
+      String packageName = service.service.getPackageName();
+      ServiceEntryInfo.RunningStatus status = ServiceEntryInfo.RunningStatus.RUNNING;
+      if ((service.flags &
+              ActivityManager.RunningServiceInfo.FLAG_PERSISTENT_PROCESS) != 0) {
+        status = ServiceEntryInfo.RunningStatus.PERSISTENT;
+      } else if ((service.flags &
+              ActivityManager.RunningServiceInfo.FLAG_FOREGROUND) != 0) {
+        status = ServiceEntryInfo.RunningStatus.FOREGROUND;
+      }
+      if (!service.started && service.clientLabel == 0) {
+        status = ServiceEntryInfo.RunningStatus.NOT_RUNNING;
+      }
+      if (status == ServiceEntryInfo.RunningStatus.RUNNING ||
+          status == ServiceEntryInfo.RunningStatus.FOREGROUND) {
+        result.add(packageName);
+      }
+    }
+    return result;
   }
 
   public static Map<String, ServiceEntryInfo.RunningStatus> getRunningServiceMap(Context context) {

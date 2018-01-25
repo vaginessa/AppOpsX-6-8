@@ -7,7 +7,7 @@
     android:key="normal"
     android:title="@string/normal">
     <android.support.v7.preference.CheckBoxPreference
-      android:defaultValue="true"
+      android:defaultValue="false"
       android:key="ignore_premission"
       android:title="@string/auto_ignore_premission"
       android:summary="@string/auto_ignore_summary"/>
@@ -22,12 +22,43 @@
       android:key="ignore_premission_templete"
       android:title="@string/auto_ignore_permission_title"
       android:summary="@string/auto_ignore_permission_temp_summary"/>
+  </android.support.v7.preference.PreferenceCategory>
 
+  <android.support.v7.preference.PreferenceCategory
+      android:key="ifw"
+      android:title="@string/ifw">
     <android.support.v7.preference.CheckBoxPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="ifw_enabled"
         android:title="@string/ifw_disable_title"
         android:summary="@string/ifw_disable_summary"/>
+    <android.support.v7.preference.CheckBoxPreference
+        android:defaultValue="false"
+        android:key="ifw_short_click"
+        android:title="@string/ifw_short_click"
+        android:summary="@string/ifw_short_click_summary"/>
+    <android.support.v7.preference.CheckBoxPreference
+        android:defaultValue="false"
+        android:key="show_running"
+        android:title="@string/show_running_apps"
+        android:summary="@string/show_running_apps_summary"/>
+    <android.support.v7.preference.Preference
+        android:key="pref_import_ifw"
+        android:title="@string/import_ifw_title"
+        />
+    <android.support.v7.preference.Preference
+        android:key="pref_export_ifw"
+        android:title="@string/export_ifw_title"
+        />
+    <android.support.v7.preference.Preference
+        android:key="pref_install_system"
+        android:title="@string/install_system_title"
+        android:summary="@string/install_system_summary"
+        />
+    <android.support.v7.preference.Preference
+        android:key="pref_reset_hint"
+        android:title="@string/reset_hint_title"
+        />
   </android.support.v7.preference.PreferenceCategory>
 
   <android.support.v7.preference.PreferenceCategory
@@ -48,7 +79,6 @@
       android:title="@string/app_daynight_mode"
       android:summary="@string/app_daynight_mode_summary"
       />
-
     <android.support.v7.preference.Preference
       android:key="pref_app_language"
       android:title="@string/app_language"
@@ -63,28 +93,6 @@
 
 
   <!--</PreferenceCategory>-->
-
-  <android.support.v7.preference.PreferenceCategory
-      android:key="others"
-      android:title="@string/others">
-    <android.support.v7.preference.Preference
-        android:key="pref_install_system"
-        android:title="@string/install_system_title"
-        android:summary="@string/install_system_summary"
-        />
-    <android.support.v7.preference.Preference
-        android:key="pref_import_ifw"
-        android:title="@string/import_ifw_title"
-        />
-    <android.support.v7.preference.Preference
-        android:key="pref_export_ifw"
-        android:title="@string/export_ifw_title"
-        />
-    <android.support.v7.preference.Preference
-        android:key="pref_reset_hint"
-        android:title="@string/reset_hint_title"
-        />
-  </android.support.v7.preference.PreferenceCategory>
 
   <android.support.v7.preference.PreferenceCategory
     android:key="about"

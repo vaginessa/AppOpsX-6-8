@@ -172,4 +172,9 @@
   <string name="export_ifw_title">导出 IFW 配置</string>
   <string name="import_ifw_title">导入 IFW 配置</string>
   <string name="import_toast">%1$s成功</string>
+  <string name="show_running_apps">高亮后台服务</string>
+  <string name="show_running_apps_summary">在顶端高亮显示有后台服务的应用</string>
+  <string name="ifw">Intent 防火墙</string>
+  <string name="ifw_short_click">短按显示服务</string>
+  <string name="ifw_short_click_summary">在应用列表内短按显示服务，取消勾选则需要长按显示。</string>
 </resources>

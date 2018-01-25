@@ -138,4 +138,9 @@
   <string name="export_ifw_title">匯出 IFW 檔案</string>
   <string name="import_ifw_title">導入 IFW 檔案</string>
   <string name="import_toast">%1$s成功</string>
+  <string name="show_running_apps">高亮背景服務</string>
+  <string name="show_running_apps_summary">在頂端高亮顯示有背景服務的程式</string>
+  <string name="ifw">Intent 防火牆</string>
+  <string name="ifw_short_click">短按顯示服務</string>
+  <string name="ifw_short_click_summary">短按程式項以顯示服務，取消勾選則長按顯示。</string>
 </resources>

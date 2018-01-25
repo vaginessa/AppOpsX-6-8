@@ -145,7 +145,7 @@ public class ServiceActivity extends BaseActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (!getConfig(KEY_IFW_ENABLED, true)) {
+        if (!getConfig(KEY_IFW_ENABLED, false)) {
             Toast.makeText(getApplicationContext(),
                     getString(R.string.ifw_disabled_hint), Toast.LENGTH_LONG).show();
         }
@@ -350,7 +350,7 @@ public class ServiceActivity extends BaseActivity implements
     }
 
     private void changeAll(boolean enabled) {
-        if (!getConfig(KEY_IFW_ENABLED, true)) {
+        if (!getConfig(KEY_IFW_ENABLED, false)) {
             return;
         }
         final List<ServiceEntryInfo> datas = activeAdapter.getDatas();
@@ -368,7 +368,7 @@ public class ServiceActivity extends BaseActivity implements
             return;
         }
         adapter.setShowConfig(getConfig(KEY_FULL_NAME, false),
-                getConfig(KEY_IFW_ENABLED, true),
+                getConfig(KEY_IFW_ENABLED, false),
                 SpHelper.getThemeMode(getApplicationContext()) ==
                         AppCompatDelegate.MODE_NIGHT_YES);
     }

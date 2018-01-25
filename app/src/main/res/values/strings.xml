@@ -39,6 +39,8 @@
   <string name="log_empty">No logs</string>
   <string name="show_sys_apps">Display system application</string>
   <string name="show_sys_apps_summary">Display system apps in the list</string>
+  <string name="show_running_apps">Highlight running services</string>
+  <string name="show_running_apps_summary">Display apps with running services at the top</string>
   <string name="use_adb_mode">Use ADB mode</string>
   <string name="use_adb_mode_summary">Using ADB mode without Root permissions, turn on [ADB over network] in the developer options \r\n or connected to the computer to execute adb tcpip %1$d in terminal</string>
   <string name="use_adb_port">Choose ADB port</string>
@@ -138,4 +140,7 @@
   <string name="export_ifw_title">Export settings of Intent Firewall</string>
   <string name="import_ifw_title">Import settings of Intent Firewall</string>
   <string name="import_toast">%1$s successfully</string>
+  <string name="ifw">Intent Firewall</string>
+  <string name="ifw_short_click">Short press to show services</string>
+  <string name="ifw_short_click_summary">Use short press in app list to show services. Otherwise, use long press.</string>
 </resources>
