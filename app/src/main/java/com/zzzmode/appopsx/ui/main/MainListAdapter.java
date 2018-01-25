@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import com.zzzmode.appopsx.R;
 import com.zzzmode.appopsx.ui.analytics.AEvent;
 import com.zzzmode.appopsx.ui.analytics.ATracker;
+import com.zzzmode.appopsx.ui.core.SpHelper;
 import com.zzzmode.appopsx.ui.model.AppInfo;
 import com.zzzmode.appopsx.ui.permission.AppPermissionActivity;
 import com.zzzmode.appopsx.ui.service.ServiceActivity;
@@ -27,6 +29,9 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
 
   protected List<AppInfo> appInfos = new ArrayList<>();
   private int HIGHLIGHT_COLOR = 0xff1976d2;
+  private int DEFAULT_COLOR = 0xFF212121;
+  private int DEFAULT_COLOR_NIGHT = 0xf2ffffff;
+  public boolean isNightMode = false;
 
   void addItem(AppInfo info) {
     appInfos.add(info);
@@ -60,6 +65,9 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
     if (appInfo.hasRunningServices) {
       holder.tvName.setTextColor(HIGHLIGHT_COLOR);
       holder.tvName.setTypeface(null, Typeface.BOLD);
+    } else {
+      holder.tvName.setTypeface(null, Typeface.NORMAL);
+      holder.tvName.setTextColor(isNightMode ? DEFAULT_COLOR_NIGHT : DEFAULT_COLOR);
     }
     holder.itemView.setTag(appInfo);
     holder.itemView.setOnClickListener(this);

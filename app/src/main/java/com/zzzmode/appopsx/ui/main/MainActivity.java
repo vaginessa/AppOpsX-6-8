@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -36,6 +37,7 @@ import com.zzzmode.appopsx.ui.analytics.AEvent;
 import com.zzzmode.appopsx.ui.analytics.ATracker;
 import com.zzzmode.appopsx.ui.core.AppOpsx;
 import com.zzzmode.appopsx.ui.core.Helper;
+import com.zzzmode.appopsx.ui.core.SpHelper;
 import com.zzzmode.appopsx.ui.main.backup.BackupActivity;
 import com.zzzmode.appopsx.ui.main.group.PermissionGroupActivity;
 import com.zzzmode.appopsx.ui.main.usagestats.PermsUsageStatsActivity;
@@ -97,6 +99,8 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
 
     adapter = new MainListAdapter();
     recyclerView.setAdapter(adapter);
+    adapter.isNightMode = SpHelper.getThemeMode(getApplicationContext()) ==
+            AppCompatDelegate.MODE_NIGHT_YES;
 
     loadData(true);
     mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
