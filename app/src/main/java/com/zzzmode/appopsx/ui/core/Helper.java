@@ -1035,7 +1035,7 @@ public class Helper {
               @Override
               public OpsResult apply(@NonNull Integer integer) throws Exception {
                 OpsResult opsForPackage = AppOpsx.getInstance(context)
-                    .setOpsMode(pkgName, integer, opMode);
+                    .setOpsMode(pkgName, integer, opMode, true);
                 if (opsForPackage != null) {
                   if (opsForPackage.getException() == null) {
                     return opsForPackage;
