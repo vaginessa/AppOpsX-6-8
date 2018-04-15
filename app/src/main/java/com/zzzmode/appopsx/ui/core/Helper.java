@@ -575,14 +575,14 @@ public class Helper {
 
         if (type == 1) {
           //按名称排序[字母在后]
-          ret.addAll(disabledAppInfos);
           ret.addAll(runningAppInfos);
+          ret.addAll(disabledAppInfos);
           ret.addAll(zhAppInfos);
           ret.addAll(enAppInfos);
         } else {
           //按名称排序[字母在前] 默认
-          ret.addAll(disabledAppInfos);
           ret.addAll(runningAppInfos);
+          ret.addAll(disabledAppInfos);
           ret.addAll(enAppInfos);
           ret.addAll(zhAppInfos);
         }
@@ -1255,16 +1255,16 @@ public class Helper {
           comparator = new Comparator<AppInfo>() {
             @Override
             public int compare(AppInfo o1, AppInfo o2) {
-              if (o1.isDisabled && !o2.isDisabled) {
-                return -1;
-              }
-              if (!o1.isDisabled && o2.isDisabled) {
-                return 1;
-              }
               if (o1.hasRunningServices && !o2.hasRunningServices) {
                 return -1;
               }
               if (!o1.hasRunningServices && o2.hasRunningServices) {
+                return 1;
+              }
+              if (o1.isDisabled && !o2.isDisabled) {
+                return -1;
+              }
+              if (!o1.isDisabled && o2.isDisabled) {
                 return 1;
               }
               return Long.compare(o2.installTime, o1.installTime);
@@ -1275,16 +1275,16 @@ public class Helper {
           comparator = new Comparator<AppInfo>() {
             @Override
             public int compare(AppInfo o1, AppInfo o2) {
-              if (o1.isDisabled && !o2.isDisabled) {
-                return -1;
-              }
-              if (!o1.isDisabled && o2.isDisabled) {
-                return 1;
-              }
               if (o1.hasRunningServices && !o2.hasRunningServices) {
                 return -1;
               }
               if (!o1.hasRunningServices && o2.hasRunningServices) {
+                return 1;
+              }
+              if (o1.isDisabled && !o2.isDisabled) {
+                return -1;
+              }
+              if (!o1.isDisabled && o2.isDisabled) {
                 return 1;
               }
               return Long.compare(Math.max(o2.installTime, o2.updateTime),
@@ -1927,18 +1927,18 @@ public class Helper {
 
             @Override
             public int compare(ServiceEntryInfo o1, ServiceEntryInfo o2) {
+              if (isRunning(o1.isRunning) && !isRunning(o2.isRunning)) {
+                return -1;
+              }
+              if (!isRunning(o1.isRunning) && isRunning(o2.isRunning)) {
+                return 1;
+              }
               if (o1.isRunning == ServiceEntryInfo.RunningStatus.DISABLED &&
                       o2.isRunning != ServiceEntryInfo.RunningStatus.DISABLED) {
                 return -1;
               }
               if (o1.isRunning != ServiceEntryInfo.RunningStatus.DISABLED &&
                       o2.isRunning == ServiceEntryInfo.RunningStatus.DISABLED) {
-                return 1;
-              }
-              if (isRunning(o1.isRunning) && !isRunning(o2.isRunning)) {
-                return -1;
-              }
-              if (!isRunning(o1.isRunning) && isRunning(o2.isRunning)) {
                 return 1;
               }
               if (o1.serviceEnabled && !o2.serviceEnabled) {
