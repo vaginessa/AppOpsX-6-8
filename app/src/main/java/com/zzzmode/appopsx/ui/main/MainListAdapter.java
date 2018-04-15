@@ -29,6 +29,7 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
 
   protected List<AppInfo> appInfos = new ArrayList<>();
   private int HIGHLIGHT_COLOR = 0xff1976d2;
+  private int DISABLED_COLOR = 0xfff50057;
   private int DEFAULT_COLOR = 0xFF212121;
   private int DEFAULT_COLOR_NIGHT = 0xf2ffffff;
   public boolean isNightMode = false;
@@ -65,6 +66,9 @@ class MainListAdapter extends RecyclerView.Adapter<AppItemViewHolder> implements
     if (appInfo.hasRunningServices) {
       holder.tvName.setTextColor(HIGHLIGHT_COLOR);
       holder.tvName.setTypeface(null, Typeface.BOLD);
+    } else if (appInfo.isDisabled) {
+      holder.tvName.setTextColor(DISABLED_COLOR);
+      holder.tvName.setTypeface(null, Typeface.NORMAL);
     } else {
       holder.tvName.setTypeface(null, Typeface.NORMAL);
       holder.tvName.setTextColor(isNightMode ? DEFAULT_COLOR_NIGHT : DEFAULT_COLOR);

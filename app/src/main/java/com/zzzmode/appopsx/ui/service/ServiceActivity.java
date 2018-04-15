@@ -259,6 +259,12 @@ public class ServiceActivity extends BaseActivity implements
             case R.id.action_service_disable_all:
                 changeAll(false);
                 break;
+            case R.id.action_service_enable_app:
+                enableApp(true);
+                break;
+            case R.id.action_service_disable_app:
+                enableApp(false);
+                break;
             case R.id.action_service_app_info:
                 startAppinfo();
                 break;
@@ -282,6 +288,8 @@ public class ServiceActivity extends BaseActivity implements
         final MenuItem settingsMenu = menu.findItem(R.id.action_show_broadcast);
         final MenuItem premsMenu = menu.findItem(R.id.action_show_full_name);
         final MenuItem infoMenu = menu.findItem(R.id.action_service_app_info);
+        final MenuItem enableAppMenu = menu.findItem(R.id.action_service_enable_app);
+        final MenuItem disableAppMenu = menu.findItem(R.id.action_service_disable_app);
 
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         menuShowFullname.setChecked(getConfig(KEY_FULL_NAME, false));
@@ -307,6 +315,8 @@ public class ServiceActivity extends BaseActivity implements
                         settingsMenu.setVisible(false);
                         premsMenu.setVisible(false);
                         infoMenu.setVisible(false);
+                        enableAppMenu.setVisible(false);
+                        disableAppMenu.setVisible(false);
                         activeAdapter = mSearchHandler.getAdapter();
 
                         ActivityCompat.invalidateOptionsMenu(ServiceActivity.this);
@@ -321,6 +331,8 @@ public class ServiceActivity extends BaseActivity implements
                         settingsMenu.setVisible(true);
                         premsMenu.setVisible(true);
                         infoMenu.setVisible(true);
+                        enableAppMenu.setVisible(true);
+                        disableAppMenu.setVisible(true);
                         activeAdapter = adapter;
                         refreshAdapter(null);
 
@@ -361,6 +373,38 @@ public class ServiceActivity extends BaseActivity implements
             activeAdapter.notifyDataSetChanged();
             mPresenter.setModes(datas);
         }
+    }
+
+    private void enableApp(boolean enable) {
+        final boolean e = enable;
+        Helper.enableApp(getApplicationContext(), pkgName, e)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<Boolean>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
+
+                    @Override
+                    public void onSuccess(@NonNull Boolean b) {
+                        Context ctx = getApplicationContext();
+                        if (!b) {
+                            Toast.makeText(ctx, ctx.getString(R.string.toast_error) + ": " + getTitle(),
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        int id = e ? R.string.menu_service_enable_app : R.string.menu_service_disable_app;
+                        Toast.makeText(ctx, ctx.getString(id) + ": " + getTitle(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Context ctx = getApplicationContext();
+                        Toast.makeText(ctx, ctx.getString(R.string.toast_error) + ": " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void setAdapterConfig(ServiceAdapter adapter) {

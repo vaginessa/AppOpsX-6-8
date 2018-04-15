@@ -143,4 +143,6 @@
   <string name="ifw">Intent 防火牆</string>
   <string name="ifw_short_click">短按顯示服務</string>
   <string name="ifw_short_click_summary">短按程式項以顯示服務，取消勾選則長按顯示。</string>
+    <string name="menu_service_enable_app">啓用 App</string>
+  <string name="menu_service_disable_app">禁用 App</string>
 </resources>

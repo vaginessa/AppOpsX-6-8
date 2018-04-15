@@ -26,6 +26,14 @@
         app:showAsAction="never"
         android:title="@string/menu_service_disable_all"/>
     <item
+        android:id="@+id/action_service_enable_app"
+        app:showAsAction="never"
+        android:title="@string/menu_service_enable_app"/>
+    <item
+        android:id="@+id/action_service_disable_app"
+        app:showAsAction="never"
+        android:title="@string/menu_service_disable_app"/>
+    <item
         android:id="@+id/action_service_app_info"
         app:showAsAction="never"
         android:title="@string/menu_app_info"/>

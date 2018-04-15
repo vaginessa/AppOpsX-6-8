@@ -17,6 +17,8 @@
   <string name="menu_block_type">Block type: %1$s</string>
   <string name="menu_service_enable_all">Enable all</string>
   <string name="menu_service_disable_all">Disable all</string>
+  <string name="menu_service_enable_app">Enable app</string>
+  <string name="menu_service_disable_app">Disable app</string>
   <string name="open_all_perms">Allow all</string>
   <string name="close_all_perms">Ignore all</string>
   <string name="no_perms">The app doesn\'t ask for any permissions</string>

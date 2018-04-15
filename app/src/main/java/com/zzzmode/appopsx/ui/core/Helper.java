@@ -65,6 +65,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -475,6 +476,7 @@ public class Helper {
         List<AppInfo> zhAppInfos = new ArrayList<AppInfo>();
         List<AppInfo> enAppInfos = new ArrayList<AppInfo>();
         List<AppInfo> runningAppInfos = new ArrayList<AppInfo>();
+        List<AppInfo> disabledAppInfos = new ArrayList<AppInfo>();
         Set<String> runningApps = Collections.emptySet();
         if (PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean("show_running", false)) {
@@ -494,6 +496,20 @@ public class Helper {
             info.applicationInfo = installedPackage.applicationInfo;
             info.hasRunningServices = runningApps.contains(info.packageName);
 
+            int state = packageManager.getApplicationEnabledSetting(installedPackage.packageName);
+            boolean isDisabled = true;
+            switch (state) {
+              case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                isDisabled = false;
+                break;
+              case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                isDisabled = !installedPackage.applicationInfo.enabled;
+                break;
+              default:
+                break;
+            }
+            info.isDisabled = isDisabled;
+
             LocalImageLoader.initAdd(context, info);
 
             //some of the app name is empty.
@@ -503,6 +519,8 @@ public class Helper {
             final char c = info.appName.charAt(0);
             if (info.hasRunningServices) {
               runningAppInfos.add(info);
+            } else if (info.isDisabled) {
+              disabledAppInfos.add(info);
             } else if (c >= 48 && c <= 122) {
               enAppInfos.add(info);
             } else {
@@ -533,6 +551,13 @@ public class Helper {
           }
         });
 
+        Collections.sort(disabledAppInfos, new Comparator<AppInfo>() {
+          @Override
+          public int compare(AppInfo o1, AppInfo o2) {
+            return o1.appName.compareToIgnoreCase(o2.appName);
+          }
+        });
+
         Collections.sort(enAppInfos, new Comparator<AppInfo>() {
           @Override
           public int compare(AppInfo o1, AppInfo o2) {
@@ -550,11 +575,13 @@ public class Helper {
 
         if (type == 1) {
           //按名称排序[字母在后]
+          ret.addAll(disabledAppInfos);
           ret.addAll(runningAppInfos);
           ret.addAll(zhAppInfos);
           ret.addAll(enAppInfos);
         } else {
           //按名称排序[字母在前] 默认
+          ret.addAll(disabledAppInfos);
           ret.addAll(runningAppInfos);
           ret.addAll(enAppInfos);
           ret.addAll(zhAppInfos);
@@ -1228,6 +1255,12 @@ public class Helper {
           comparator = new Comparator<AppInfo>() {
             @Override
             public int compare(AppInfo o1, AppInfo o2) {
+              if (o1.isDisabled && !o2.isDisabled) {
+                return -1;
+              }
+              if (!o1.isDisabled && o2.isDisabled) {
+                return 1;
+              }
               if (o1.hasRunningServices && !o2.hasRunningServices) {
                 return -1;
               }
@@ -1242,6 +1275,12 @@ public class Helper {
           comparator = new Comparator<AppInfo>() {
             @Override
             public int compare(AppInfo o1, AppInfo o2) {
+              if (o1.isDisabled && !o2.isDisabled) {
+                return -1;
+              }
+              if (!o1.isDisabled && o2.isDisabled) {
+                return 1;
+              }
               if (o1.hasRunningServices && !o2.hasRunningServices) {
                 return -1;
               }
@@ -1359,6 +1398,30 @@ public class Helper {
           }
         }
         return ret;
+      }
+    });
+  }
+
+  private static final String[] protectApp = {
+          "com.zzzmode.appopsx.sys", "android",
+          "com.android.systemui", "com.android.launcher3",
+          "com.miui.home", "com.miui.securitycenter",
+          "com.miui.core"
+  };
+  private static final Set<String> protectAppSet = new HashSet<>(Arrays.asList(protectApp));
+
+  public static Single<Boolean> enableApp(final Context context, final String pkgName, final boolean enable) {
+    return SingleJust.just(pkgName).map(new Function<String, Boolean>() {
+      @Override
+      public Boolean apply(String s) throws Exception {
+        if (protectAppSet.contains(s)) {
+          return false;
+        }
+        PackageManager packageManager = context.getPackageManager();
+        int state = enable ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT :
+                             PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        packageManager.setApplicationEnabledSetting(s, state, 0);
+        return true;
       }
     });
   }

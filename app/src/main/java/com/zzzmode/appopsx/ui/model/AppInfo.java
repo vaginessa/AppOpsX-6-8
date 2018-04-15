@@ -18,6 +18,7 @@ public class AppInfo implements Parcelable {
   public String pinyin;
   public ApplicationInfo applicationInfo;
   public boolean hasRunningServices;
+  public boolean isDisabled;
 
   @Override
   public boolean equals(Object o) {
@@ -48,6 +49,7 @@ public class AppInfo implements Parcelable {
 
   public AppInfo() {
     this.hasRunningServices = false;
+    this.isDisabled = false;
   }
 
   protected AppInfo(Parcel in) {
