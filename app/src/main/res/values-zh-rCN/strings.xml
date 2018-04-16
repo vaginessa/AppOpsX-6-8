@@ -179,4 +179,5 @@
   <string name="ifw_short_click_summary">在应用列表内短按显示服务，取消勾选则需要长按显示。</string>
     <string name="menu_service_enable_app">启用 App</string>
   <string name="menu_service_disable_app">禁用 App</string>
+    <string name="ifw_restore_title">自动恢复</string>
 </resources>

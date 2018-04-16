@@ -3,6 +3,7 @@ package com.zzzmode.appopsx.ui.core;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.preference.PreferenceManager;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.ResourceObserver;
@@ -15,6 +16,10 @@ import io.reactivex.schedulers.Schedulers;
 public class BootReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {
+      if (!PreferenceManager.getDefaultSharedPreferences(context)
+              .getBoolean("on_boot", false)) {
+          return;
+      }
       Helper.syncNoBack(context.getApplicationContext())
               .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
               .subscribe(new ResourceObserver<Boolean>() {
