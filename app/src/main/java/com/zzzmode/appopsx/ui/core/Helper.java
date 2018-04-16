@@ -1814,6 +1814,7 @@ public class Helper {
       public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
         updateService(context, "", null);
         syncNoBackReal(context);
+        forceEnableApps(context);
         e.onNext(true);
         e.onComplete();
       }
