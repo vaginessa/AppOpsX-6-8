@@ -1410,18 +1410,22 @@ public class Helper {
   };
   private static final Set<String> protectAppSet = new HashSet<>(Arrays.asList(protectApp));
 
+  private static boolean enableAppReal(final Context context, final String s, final boolean enable) {
+    if (protectAppSet.contains(s)) {
+      return false;
+    }
+    PackageManager packageManager = context.getPackageManager();
+    int state = enable ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT :
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+    packageManager.setApplicationEnabledSetting(s, state, 0);
+    return true;
+  }
+
   public static Single<Boolean> enableApp(final Context context, final String pkgName, final boolean enable) {
     return SingleJust.just(pkgName).map(new Function<String, Boolean>() {
       @Override
       public Boolean apply(String s) throws Exception {
-        if (protectAppSet.contains(s)) {
-          return false;
-        }
-        PackageManager packageManager = context.getPackageManager();
-        int state = enable ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT :
-                             PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-        packageManager.setApplicationEnabledSetting(s, state, 0);
-        return true;
+        return enableAppReal(context, s, enable);
       }
     });
   }
@@ -1430,6 +1434,7 @@ public class Helper {
 
   private static final Map<String, Map<String, Set<String>>> xmlDict = new LinkedHashMap<>();
   private static final Set<String> noBackSet = new LinkedHashSet<>();
+  private static final Set<String> forceEnableAppSet = new LinkedHashSet<>();
   private static final String xmlBackupName = "ifw_backup.xml";
   private static final String[] xmlPersistent = {"Android", "ifw_backup.xml"};
   private static final String[] xmlInternal = {"ifw", "ifw.xml"};
@@ -1539,6 +1544,12 @@ public class Helper {
         if (m.matches()) {
           String ident = m.group(1);
           noBackSet.add(ident.trim());
+        }
+        final Pattern forceEnableApp = Pattern.compile("<!-- FORCE_ENABLE: (.+) -->");
+        m = forceEnableApp.matcher(trimedLine);
+        if (m.matches()) {
+          String ident = m.group(1);
+          forceEnableAppSet.add(ident.trim());
         }
       }
     }
@@ -1767,6 +1778,13 @@ public class Helper {
     }
   }
 
+  private static void forceEnableApps(final Context context) throws Exception {
+    String[] enableList = forceEnableAppSet.toArray(new String[forceEnableAppSet.size()]);
+    for (String pkg: enableList) {
+      enableAppReal(context, pkg, true);
+    }
+  }
+
   public static Observable<Boolean> syncNoBack(final Context context) {
 
     return Observable.create(new ObservableOnSubscribe<Boolean>() {
@@ -1776,6 +1794,7 @@ public class Helper {
           xmlDictInit(context);
         } catch (IOException e1) {}
         syncNoBackReal(context);
+        forceEnableApps(context);
         e.onNext(true);
         e.onComplete();
       }
