@@ -1538,12 +1538,14 @@ public class Helper {
             services.add(ident[1]);
             outList.put(ident[0], services);
           }
+          continue;
         }
         final Pattern noBackLine = Pattern.compile("<!-- RUN_IN_BACKGROUND: (.+) -->");
         m = noBackLine.matcher(trimedLine);
         if (m.matches()) {
           String ident = m.group(1);
           noBackSet.add(ident.trim());
+          continue;
         }
         final Pattern forceEnableApp = Pattern.compile("<!-- FORCE_ENABLE: (.+) -->");
         m = forceEnableApp.matcher(trimedLine);
