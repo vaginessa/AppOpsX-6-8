@@ -1604,6 +1604,10 @@ public class Helper {
     for (String pkg: noBackList) {
       result.append("<!-- RUN_IN_BACKGROUND: " + pkg + " -->\n");
     }
+    String[] enableList = forceEnableAppSet.toArray(new String[forceEnableAppSet.size()]);
+    for (String pkg: enableList) {
+      result.append("<!-- FORCE_ENABLE: " + pkg + " -->\n");
+    }
     return result.toString();
   }
 
