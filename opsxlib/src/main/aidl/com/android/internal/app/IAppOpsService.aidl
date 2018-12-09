@@ -27,8 +27,8 @@ interface IAppOpsService {
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);
-    List<PackageOps> getPackagesForOps(in int[] ops);
-    List<PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
+    List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
+    List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
     void setUidMode(int code, int uid, int mode);
     void setMode(int code, int uid, String packageName, int mode);
     void resetAllModes(int reqUserId, String reqPackageName);
