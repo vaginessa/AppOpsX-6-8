@@ -45,6 +45,7 @@ import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.ResourceObserver;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -393,6 +394,22 @@ public class ServiceActivity extends BaseActivity implements
                                     Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        Helper.setEnableApp(ctx, pkgName, e)
+                                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new ResourceObserver<Boolean>() {
+                                    @Override
+                                    public void onNext(Boolean value) {
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+
+                                    }
+                                });
                         int id = e ? R.string.menu_service_enable_app : R.string.menu_service_disable_app;
                         Toast.makeText(ctx, ctx.getString(id) + ": " + getTitle(),
                                 Toast.LENGTH_SHORT).show();

@@ -1409,6 +1409,33 @@ public class Helper {
           "com.miui.core"
   };
   private static final Set<String> protectAppSet = new HashSet<>(Arrays.asList(protectApp));
+  private static final Set<String> forceDisableAppSet = new LinkedHashSet<>();
+
+  public static Observable<Boolean> setEnableApp(final Context context, final String pkgName,
+                                                 final boolean isEnableApp) {
+
+    return Observable.create(new ObservableOnSubscribe<Boolean>() {
+      @Override
+      public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+        xmlDictInit(context);
+        synchronized (forceDisableAppSet) {
+          if (isEnableApp) {
+            forceDisableAppSet.remove(pkgName);
+          } else {
+            forceDisableAppSet.add(pkgName);
+          }
+        }
+        synchronized (forceEnableAppSet) {
+          if (!isEnableApp) {
+            forceEnableAppSet.remove(pkgName);
+          }
+        }
+        updateService(context, pkgName, null, false);
+        e.onNext(true);
+        e.onComplete();
+      }
+    });
+  }
 
   private static boolean enableAppReal(final Context context, final String s, final boolean enable) {
     if (protectAppSet.contains(s)) {
@@ -1553,6 +1580,12 @@ public class Helper {
           String ident = m.group(1);
           forceEnableAppSet.add(ident.trim());
         }
+        final Pattern forceDisableApp = Pattern.compile("<!-- FORCE_DISABLE: (.+) -->");
+        m = forceDisableApp.matcher(trimedLine);
+        if (m.matches()) {
+          String ident = m.group(1);
+          forceDisableAppSet.add(ident.trim());
+        }
       }
     }
   }
@@ -1607,6 +1640,10 @@ public class Helper {
     String[] enableList = forceEnableAppSet.toArray(new String[forceEnableAppSet.size()]);
     for (String pkg: enableList) {
       result.append("<!-- FORCE_ENABLE: " + pkg + " -->\n");
+    }
+    String[] disableList = forceDisableAppSet.toArray(new String[forceDisableAppSet.size()]);
+    for (String pkg: disableList) {
+      result.append("<!-- FORCE_DISABLE: " + pkg + " -->\n");
     }
     return result.toString();
   }
@@ -1788,6 +1825,10 @@ public class Helper {
     String[] enableList = forceEnableAppSet.toArray(new String[forceEnableAppSet.size()]);
     for (String pkg: enableList) {
       enableAppReal(context, pkg, true);
+    }
+    String[] disableList = forceDisableAppSet.toArray(new String[forceDisableAppSet.size()]);
+    for (String pkg: disableList) {
+      enableAppReal(context, pkg, false);
     }
   }
 
