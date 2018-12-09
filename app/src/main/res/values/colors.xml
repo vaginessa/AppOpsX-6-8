@@ -12,4 +12,6 @@
 
   <color name="fullColor">#FF000000</color>
   <color name="divider">#20000000</color>
+
+  <color name="app_icon_background">#46b348</color>
 </resources>
