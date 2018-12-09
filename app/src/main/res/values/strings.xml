@@ -44,7 +44,7 @@
   <string name="show_running_apps">Highlight running services</string>
   <string name="show_running_apps_summary">Display apps with running services at the top</string>
   <string name="use_adb_mode">Use ADB mode</string>
-  <string name="use_adb_mode_summary">Using ADB mode without Root permissions, turn on [ADB over network] in the developer options \r\n or connected to the computer to execute adb tcpip %1$d in terminal</string>
+  <string name="use_adb_mode_summary">Using ADB mode without Root permissions, turn on [ADB over network] in the developer options \n or connected to the computer to execute adb tcpip %1$d in terminal</string>
   <string name="use_adb_port">Choose ADB port</string>
   <string name="use_adb_port_summary">Current ABD port: %1$d</string>
   <string name="app_sort_type">Sort by</string>
