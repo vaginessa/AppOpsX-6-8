@@ -49,6 +49,20 @@ setperm() {
     find "$3" -type f -exec chmod "$2" {} \;
 }
 
+rmcache() {
+    f="$1"
+    [ -d /data/dalvik-cache/ ] || return 0
+    app="$(echo $f | tr / @ | cut -c2-)"
+    [ -z "$app" ] && return 0
+    app="${app}@"
+    find /data/dalvik-cache/ -iname "${app}*" |
+        while read i; do
+            j="$(basename $i)"
+            print "Clean cache: ${j/${app}/}"
+            rm -f "$i"
+        done
+}
+
 print "*********************"
 print "* AppOpsX Installer *"
 print "*********************"
@@ -93,6 +107,7 @@ print "Setting correct permissions..."
 for f in $app_list; do
     print "Fixing permission: $f"
     setperm 0755 0644 $f
+    rmcache $f
 done
 
 umount /system
